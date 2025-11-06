@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "info": {
+    "title": "Order Event Processing",
+    "version": "1.0.0",
+    "description": "Real-time order event streaming from e-commerce platform to fulfillment system via Kafka",
+    "tags": ["orders", "kafka", "event-driven"]
+  },
+  "systems": {
+    "ecommerce-platform": {
+      "name": "E-Commerce Platform",
+      "type": "application",
+      "description": "Online shopping platform",
+      "owner": "E-Commerce Team",
+      "environment": "production"
+    },
+    "fulfillment-system": {
+      "name": "Order Fulfillment System",
+      "type": "application",
+      "description": "Warehouse and fulfillment management",
+      "owner": "Operations Team",
+      "environment": "production"
+    },
+    "kafka-cluster": {
+      "name": "Apache Kafka Cluster",
+      "type": "service",
+      "description": "Event streaming platform",
+      "owner": "Platform Team",
+      "environment": "production"
+    }
+  },
+  "integrations": [
+    {
+      "id": "order-event-stream",
+      "name": "Order Events Stream",
+      "description": "Stream order events from e-commerce to fulfillment system",
+      "pattern": "event-stream",
+      "source": {
+        "system": "ecommerce-platform",
+        "protocol": "kafka",
+        "connection": {
+          "host": "kafka.example.com",
+          "port": 9092,
+          "topic": "orders.events"
+        },
+        "format": "json",
+        "schema": "OrderEventSchema"
+      },
+      "target": {
+        "system": "fulfillment-system",
+        "protocol": "kafka",
+        "connection": {
+          "host": "kafka.example.com",
+          "port": 9092,
+          "topic": "fulfillment.orders"
+        },
+        "format": "json",
+        "schema": "FulfillmentOrderSchema"
+      },
+      "trigger": {
+        "type": "event",
+        "event": {
+          "source": "com.example.ecommerce",
+          "type": "order.created",
+          "filter": {
+            "status": ["confirmed", "paid"]
+          }
+        }
+      },
+      "transformation": {
+        "type": "mapping",
+        "mapping": {
+          "order_id": "$.data.orderId",
+          "customer_id": "$.data.customerId",
+          "items": "$.data.items[*].{sku: sku, quantity: quantity, price: price}",
+          "shipping_address": "$.data.shippingAddress",
+          "total_amount": "$.data.totalAmount",
+          "order_date": "$.time",
+          "priority": "$.data.shippingMethod == 'express' ? 'high' : 'normal'"
+        }
+      },
+      "errorHandling": {
+        "retry": {
+          "maxAttempts": 5,
+          "backoff": "exponential",
+          "delay": "1s",
+          "maxDelay": "60s"
+        },
+        "deadLetterQueue": {
+          "enabled": true,
+          "endpoint": {
+            "system": "kafka-cluster",
+            "protocol": "kafka",
+            "connection": {
+              "topic": "orders.dlq"
+            }
+          }
+        },
+        "alerting": {
+          "enabled": true,
+          "channels": ["pagerduty", "slack"],
+          "recipients": ["#operations-alerts"]
+        }
+      },
+      "metadata": {
+        "sla": {
+          "latency": "100ms",
+          "throughput": "5000/sec",
+          "availability": "99.95%"
+        },
+        "owner": "Integration Team",
+        "tags": ["critical", "real-time", "orders"]
+      },
+      "config": {
+        "provider": "kafka",
+        "topic": "orders.events",
+        "partitions": 10,
+        "replicationFactor": 3,
+        "consumerGroup": "fulfillment-order-processor",
+        "offsetReset": "earliest",
+        "enableAutoCommit": false,
+        "maxPollRecords": 500,
+        "compression": "snappy",
+        "idempotence": true,
+        "cloudEvents": true
+      }
+    },
+    {
+      "id": "order-status-updates",
+      "name": "Order Status Update Stream",
+      "description": "Stream fulfillment status updates back to e-commerce platform",
+      "pattern": "event-stream",
+      "source": {
+        "system": "fulfillment-system",
+        "protocol": "kafka",
+        "connection": {
+          "topic": "fulfillment.status"
+        },
+        "format": "json"
+      },
+      "target": {
+        "system": "ecommerce-platform",
+        "protocol": "kafka",
+        "connection": {
+          "topic": "orders.status"
+        },
+        "format": "json"
+      },
+      "trigger": {
+        "type": "event",
+        "event": {
+          "source": "com.example.fulfillment",
+          "type": "order.status.changed"
+        }
+      },
+      "transformation": {
+        "type": "template",
+        "templateEngine": "jsonata",
+        "template": "{ \"orderId\": data.orderId, \"status\": data.status, \"timestamp\": $now(), \"location\": data.warehouseLocation }"
+      },
+      "errorHandling": {
+        "retry": {
+          "maxAttempts": 3,
+          "backoff": "fixed",
+          "delay": "5s"
+        }
+      },
+      "metadata": {
+        "sla": {
+          "latency": "500ms",
+          "throughput": "2000/sec"
+        },
+        "tags": ["status-updates", "real-time"]
+      },
+      "config": {
+        "provider": "kafka",
+        "topic": "fulfillment.status",
+        "consumerGroup": "ecommerce-status-updater",
+        "offsetReset": "latest",
+        "enableAutoCommit": true,
+        "cloudEvents": true
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "OrderEventSchema": {
+        "type": "object",
+        "required": ["specversion", "type", "source", "id", "time", "data"],
+        "properties": {
+          "specversion": {"type": "string", "const": "1.0"},
+          "type": {"type": "string"},
+          "source": {"type": "string", "format": "uri"},
+          "id": {"type": "string"},
+          "time": {"type": "string", "format": "date-time"},
+          "datacontenttype": {"type": "string"},
+          "data": {
+            "type": "object",
+            "properties": {
+              "orderId": {"type": "string"},
+              "customerId": {"type": "string"},
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sku": {"type": "string"},
+                    "name": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "price": {"type": "number"}
+                  }
+                }
+              },
+              "totalAmount": {"type": "number"},
+              "shippingAddress": {
+                "type": "object",
+                "properties": {
+                  "street": {"type": "string"},
+                  "city": {"type": "string"},
+                  "state": {"type": "string"},
+                  "zip": {"type": "string"},
+                  "country": {"type": "string"}
+                }
+              },
+              "shippingMethod": {"type": "string", "enum": ["standard", "express", "overnight"]},
+              "status": {"type": "string"}
+            }
+          }
+        }
+      },
+      "FulfillmentOrderSchema": {
+        "type": "object",
+        "required": ["order_id", "items"],
+        "properties": {
+          "order_id": {"type": "string"},
+          "customer_id": {"type": "string"},
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sku": {"type": "string"},
+                "quantity": {"type": "integer"},
+                "price": {"type": "number"}
+              }
+            }
+          },
+          "shipping_address": {"type": "object"},
+          "total_amount": {"type": "number"},
+          "order_date": {"type": "string", "format": "date-time"},
+          "priority": {"type": "string", "enum": ["low", "normal", "high", "urgent"]}
+        }
+      }
+    }
+  }
+}

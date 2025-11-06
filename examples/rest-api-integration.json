@@ -1,0 +1,201 @@
+{
+  "version": "1.0.0",
+  "info": {
+    "title": "Customer Data Integration",
+    "version": "1.0.0",
+    "description": "REST API integration between CRM and ERP systems",
+    "contact": {
+      "name": "Integration Team",
+      "email": "integration@example.com"
+    },
+    "tags": ["customer", "crm", "erp"]
+  },
+  "systems": {
+    "salesforce-crm": {
+      "name": "Salesforce CRM",
+      "type": "external",
+      "description": "Customer Relationship Management system",
+      "version": "v52.0",
+      "owner": "Sales Team",
+      "environment": "production"
+    },
+    "sap-erp": {
+      "name": "SAP ERP",
+      "type": "application",
+      "description": "Enterprise Resource Planning system",
+      "version": "S/4HANA 2021",
+      "owner": "IT Team",
+      "environment": "production"
+    }
+  },
+  "integrations": [
+    {
+      "id": "crm-to-erp-customer-sync",
+      "name": "Customer Sync from CRM to ERP",
+      "description": "Synchronize customer data from Salesforce to SAP ERP when customer is created or updated",
+      "pattern": "rest-api",
+      "source": {
+        "system": "salesforce-crm",
+        "protocol": "https",
+        "connection": {
+          "url": "https://api.salesforce.com/services/data/v52.0"
+        },
+        "format": "json",
+        "schema": "CustomerSchema"
+      },
+      "target": {
+        "system": "sap-erp",
+        "protocol": "https",
+        "connection": {
+          "url": "https://erp.example.com/api/v1"
+        },
+        "format": "json",
+        "schema": "ERPCustomerSchema"
+      },
+      "trigger": {
+        "type": "webhook",
+        "webhook": {
+          "path": "/webhooks/salesforce/customer",
+          "method": "POST"
+        }
+      },
+      "transformation": {
+        "type": "mapping",
+        "mapping": {
+          "customer_id": "$.Id",
+          "name": "$.Name",
+          "email": "$.Email",
+          "phone": "$.Phone",
+          "address": {
+            "street": "$.BillingStreet",
+            "city": "$.BillingCity",
+            "state": "$.BillingState",
+            "zip": "$.BillingPostalCode",
+            "country": "$.BillingCountry"
+          },
+          "status": "$.Status",
+          "created_date": "$.CreatedDate"
+        }
+      },
+      "errorHandling": {
+        "retry": {
+          "maxAttempts": 3,
+          "backoff": "exponential",
+          "delay": "2s",
+          "maxDelay": "30s"
+        },
+        "deadLetterQueue": {
+          "enabled": true,
+          "endpoint": {
+            "system": "error-queue",
+            "protocol": "kafka",
+            "connection": {
+              "topic": "integration-errors"
+            }
+          }
+        },
+        "alerting": {
+          "enabled": true,
+          "channels": ["email", "slack"],
+          "recipients": ["integration-team@example.com", "#integration-alerts"]
+        }
+      },
+      "security": [
+        {
+          "oauth2": ["read:customers", "write:customers"]
+        }
+      ],
+      "metadata": {
+        "sla": {
+          "latency": "5s",
+          "throughput": "100/min",
+          "availability": "99.9%"
+        },
+        "owner": "Integration Team",
+        "tags": ["critical", "real-time"],
+        "documentation": "https://wiki.example.com/integrations/crm-erp-sync"
+      },
+      "config": {
+        "method": "POST",
+        "path": "/customers",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-Integration-Source": "salesforce"
+        },
+        "requestBody": {
+          "contentType": "application/json",
+          "schema": {"$ref": "#/components/schemas/ERPCustomerSchema"}
+        },
+        "responseExpected": {
+          "statusCode": 201,
+          "schema": {"$ref": "#/components/schemas/ERPCustomerResponse"}
+        },
+        "timeout": "30s"
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "CustomerSchema": {
+        "type": "object",
+        "properties": {
+          "Id": {"type": "string"},
+          "Name": {"type": "string"},
+          "Email": {"type": "string", "format": "email"},
+          "Phone": {"type": "string"},
+          "BillingStreet": {"type": "string"},
+          "BillingCity": {"type": "string"},
+          "BillingState": {"type": "string"},
+          "BillingPostalCode": {"type": "string"},
+          "BillingCountry": {"type": "string"},
+          "Status": {"type": "string"},
+          "CreatedDate": {"type": "string", "format": "date-time"}
+        }
+      },
+      "ERPCustomerSchema": {
+        "type": "object",
+        "required": ["customer_id", "name"],
+        "properties": {
+          "customer_id": {"type": "string"},
+          "name": {"type": "string"},
+          "email": {"type": "string", "format": "email"},
+          "phone": {"type": "string"},
+          "address": {
+            "type": "object",
+            "properties": {
+              "street": {"type": "string"},
+              "city": {"type": "string"},
+              "state": {"type": "string"},
+              "zip": {"type": "string"},
+              "country": {"type": "string"}
+            }
+          },
+          "status": {"type": "string"},
+          "created_date": {"type": "string", "format": "date-time"}
+        }
+      },
+      "ERPCustomerResponse": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "message": {"type": "string"},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://login.salesforce.com/services/oauth2/token",
+            "scopes": {
+              "read:customers": "Read customer data",
+              "write:customers": "Write customer data"
+            }
+          }
+        }
+      }
+    }
+  }
+}
