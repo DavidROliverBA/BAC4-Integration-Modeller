@@ -300,36 +300,72 @@
             font-weight: 600;
         }
 
-        /* Connection Points */
+        /* Connection Points - React Flow Style */
         .connection-point {
             position: absolute;
-            width: 16px;
-            height: 16px;
-            background: var(--purple);
+            width: 14px;
+            height: 14px;
+            background: #8b5cf6;
             border: 3px solid white;
             border-radius: 50%;
             cursor: crosshair;
-            z-index: 10;
-            transition: all 0.2s;
+            z-index: 20;
+            transition: all 0.15s;
+            box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
         }
 
         .connection-point:hover {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             background: #7c3aed;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.3);
+            transform: scale(1.1);
         }
 
-        .connection-point.output {
-            right: -8px;
+        .connection-point.connecting {
+            background: #10b981;
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.3);
+            animation: pulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Four connection points per node - React Flow style */
+        .connection-point.top {
+            top: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .connection-point.right {
+            right: -7px;
             top: 50%;
             transform: translateY(-50%);
         }
 
-        .connection-point.input {
-            left: -8px;
+        .connection-point.bottom {
+            bottom: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .connection-point.left {
+            left: -7px;
             top: 50%;
             transform: translateY(-50%);
+        }
+
+        .connection-point.top:hover,
+        .connection-point.bottom:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .connection-point.left:hover,
+        .connection-point.right:hover {
+            transform: translateY(-50%) scale(1.1);
         }
 
         /* Integration Node */
@@ -967,11 +1003,12 @@
             <div class="section">
                 <h3>💡 Tips</h3>
                 <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
-                    • Drag systems and integrations onto canvas<br>
-                    • Click connection point and drag to create edges<br>
+                    • Drag items onto canvas<br>
+                    • <strong>4 connection points</strong> per node (top/right/bottom/left)<br>
+                    • Click & drag from any purple dot to connect<br>
                     • Right-click for context menu<br>
-                    • Use mouse wheel to zoom<br>
-                    • Press ? for shortcuts
+                    • Mouse wheel to zoom<br>
+                    • Press <strong>?</strong> for shortcuts
                 </p>
             </div>
         </div>
@@ -991,7 +1028,8 @@
                         <div class="empty-state-icon">🎨</div>
                         <h3>Start Building Your Integration</h3>
                         <p>Drag systems and integration patterns from the left panel</p>
-                        <p style="margin-top: 0.5rem;">Click connection points and drag to create edges</p>
+                        <p style="margin-top: 0.5rem;"><strong>Create Edges:</strong> Click & drag from any purple connection point</p>
+                        <p style="margin-top: 0.25rem;">Each node has 4 connection points (⬆️➡️⬇️⬅️)</p>
                         <p style="margin-top: 0.5rem;">Or load an example to get started quickly</p>
                     </div>
                 </div>
@@ -1012,7 +1050,7 @@
                 <div class="empty-state-icon">⚙️</div>
                 <h3>Properties</h3>
                 <p>Select a component to edit its properties</p>
-                <p style="margin-top: 1rem; font-size: 0.75rem;">💡 Tip: Click connection points to create edges between nodes</p>
+                <p style="margin-top: 1rem; font-size: 0.75rem;">💡 <strong>Tip:</strong> Click & drag from purple connection points (each node has 4: ⬆️➡️⬇️⬅️)</p>
             </div>
         </div>
     </div>
@@ -1413,8 +1451,10 @@
                         <div class="node-icon">${icon}</div>
                         <div class="node-title">${node.data.name}</div>
                         <div class="node-subtitle">${node.subtype}</div>
-                        <div class="connection-point output" data-node-id="${node.id}"></div>
-                        <div class="connection-point input" data-node-id="${node.id}"></div>
+                        <div class="connection-point top" data-node-id="${node.id}" data-position="top" title="Connect from top"></div>
+                        <div class="connection-point right" data-node-id="${node.id}" data-position="right" title="Connect from right"></div>
+                        <div class="connection-point bottom" data-node-id="${node.id}" data-position="bottom" title="Connect from bottom"></div>
+                        <div class="connection-point left" data-node-id="${node.id}" data-position="left" title="Connect from left"></div>
                     `;
                 } else {
                     const icon = PATTERN_ICONS[node.pattern] || '🔌';
@@ -1422,8 +1462,10 @@
                         <div class="integration-icon">${icon}</div>
                         <div class="integration-title">${node.data.name}</div>
                         <div class="integration-pattern">${node.pattern}</div>
-                        <div class="connection-point output" data-node-id="${node.id}"></div>
-                        <div class="connection-point input" data-node-id="${node.id}"></div>
+                        <div class="connection-point top" data-node-id="${node.id}" data-position="top" title="Connect from top"></div>
+                        <div class="connection-point right" data-node-id="${node.id}" data-position="right" title="Connect from right"></div>
+                        <div class="connection-point bottom" data-node-id="${node.id}" data-position="bottom" title="Connect from bottom"></div>
+                        <div class="connection-point left" data-node-id="${node.id}" data-position="left" title="Connect from left"></div>
                     `;
                 }
 
@@ -1498,10 +1540,15 @@
         }
 
         function startConnection(node, point) {
+            const position = point.dataset.position;
             connectionStart = {
                 node: node,
-                isOutput: point.classList.contains('output')
+                position: position,
+                point: point
             };
+
+            // Add visual feedback
+            point.classList.add('connecting');
 
             // Create temporary connection line
             const svg = document.getElementById('connectionsSvg');
@@ -1514,6 +1561,25 @@
             document.addEventListener('mouseup', onConnectionEnd, { once: true });
         }
 
+        function getConnectionPointCoordinates(node, position) {
+            // Calculate the center point of each connection based on position
+            const nodeWidth = node.type === 'system' ? 160 : 180;
+            const nodeHeight = node.type === 'system' ? 120 : 110;
+
+            switch(position) {
+                case 'top':
+                    return { x: node.x + nodeWidth / 2, y: node.y };
+                case 'right':
+                    return { x: node.x + nodeWidth, y: node.y + nodeHeight / 2 };
+                case 'bottom':
+                    return { x: node.x + nodeWidth / 2, y: node.y + nodeHeight };
+                case 'left':
+                    return { x: node.x, y: node.y + nodeHeight / 2 };
+                default:
+                    return { x: node.x + nodeWidth / 2, y: node.y + nodeHeight / 2 };
+            }
+        }
+
         function onConnectionMove(e) {
             if (!connectionStart || !tempConnection) return;
 
@@ -1521,13 +1587,14 @@
             const rect = canvas.getBoundingClientRect();
             const startNode = connectionStart.node;
 
-            const startX = startNode.x + 80;
-            const startY = startNode.y + 60;
+            // Get the connection point coordinates based on position
+            const startCoords = getConnectionPointCoordinates(startNode, connectionStart.position);
+
             const endX = (e.clientX - rect.left - canvasOffset.x) / zoomLevel;
             const endY = (e.clientY - rect.top - canvasOffset.y) / zoomLevel;
 
-            tempConnection.setAttribute('x1', startX);
-            tempConnection.setAttribute('y1', startY);
+            tempConnection.setAttribute('x1', startCoords.x);
+            tempConnection.setAttribute('y1', startCoords.y);
             tempConnection.setAttribute('x2', endX);
             tempConnection.setAttribute('y2', endY);
         }
@@ -1535,9 +1602,14 @@
         function onConnectionEnd(e) {
             document.removeEventListener('mousemove', onConnectionMove);
 
+            // Remove visual feedback
+            if (connectionStart && connectionStart.point) {
+                connectionStart.point.classList.remove('connecting');
+            }
+
             // Check if we ended on a connection point
             const target = e.target;
-            if (target.classList.contains('connection-point')) {
+            if (target && target.classList && target.classList.contains('connection-point')) {
                 const targetNodeId = target.dataset.nodeId;
                 const targetNode = canvasNodes.find(n => n.id === targetNodeId);
 
@@ -1610,37 +1682,73 @@
                 const sourceNode = canvasNodes.find(n => n.id === sourceSystemId);
                 const targetNode = canvasNodes.find(n => n.id === targetSystemId);
 
+                // Calculate optimal connection positions
+                let sourcePos = 'right';
+                let targetPos = 'left';
+                let integrationSourcePos = 'left';
+                let integrationTargetPos = 'right';
+
                 // Draw source connection
                 if (sourceNode) {
+                    // Determine best connection point based on relative positions
+                    const dx = integration.x - sourceNode.x;
+                    const dy = integration.y - sourceNode.y;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        sourcePos = dx > 0 ? 'right' : 'left';
+                        integrationSourcePos = dx > 0 ? 'left' : 'right';
+                    } else {
+                        sourcePos = dy > 0 ? 'bottom' : 'top';
+                        integrationSourcePos = dy > 0 ? 'top' : 'bottom';
+                    }
+
+                    const sourceCoords = getConnectionPointCoordinates(sourceNode, sourcePos);
+                    const integrationSourceCoords = getConnectionPointCoordinates(integration, integrationSourcePos);
+
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('class', 'connection-line');
-                    line.setAttribute('x1', sourceNode.x + 80);
-                    line.setAttribute('y1', sourceNode.y + 60);
-                    line.setAttribute('x2', integration.x + 90);
-                    line.setAttribute('y2', integration.y + 50);
+                    line.setAttribute('x1', sourceCoords.x);
+                    line.setAttribute('y1', sourceCoords.y);
+                    line.setAttribute('x2', integrationSourceCoords.x);
+                    line.setAttribute('y2', integrationSourceCoords.y);
                     svg.appendChild(line);
                 }
 
                 // Draw target connection
                 if (targetNode) {
+                    // Determine best connection point based on relative positions
+                    const dx = targetNode.x - integration.x;
+                    const dy = targetNode.y - integration.y;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        integrationTargetPos = dx > 0 ? 'right' : 'left';
+                        targetPos = dx > 0 ? 'left' : 'right';
+                    } else {
+                        integrationTargetPos = dy > 0 ? 'bottom' : 'top';
+                        targetPos = dy > 0 ? 'top' : 'bottom';
+                    }
+
+                    const integrationTargetCoords = getConnectionPointCoordinates(integration, integrationTargetPos);
+                    const targetCoords = getConnectionPointCoordinates(targetNode, targetPos);
+
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                     line.setAttribute('class', 'connection-line');
-                    line.setAttribute('x1', integration.x + 90);
-                    line.setAttribute('y1', integration.y + 50);
-                    line.setAttribute('x2', targetNode.x + 80);
-                    line.setAttribute('y2', targetNode.y + 60);
+                    line.setAttribute('x1', integrationTargetCoords.x);
+                    line.setAttribute('y1', integrationTargetCoords.y);
+                    line.setAttribute('x2', targetCoords.x);
+                    line.setAttribute('y2', targetCoords.y);
                     svg.appendChild(line);
 
-                    // Add label
-                    const midX = (integration.x + 90 + targetNode.x + 80) / 2;
-                    const midY = (integration.y + 50 + targetNode.y + 60) / 2;
+                    // Add label at midpoint
+                    const midX = (integrationTargetCoords.x + targetCoords.x) / 2;
+                    const midY = (integrationTargetCoords.y + targetCoords.y) / 2;
 
                     const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     bgRect.setAttribute('class', 'connection-label-bg');
-                    bgRect.setAttribute('x', midX - 30);
-                    bgRect.setAttribute('y', midY - 8);
-                    bgRect.setAttribute('width', 60);
-                    bgRect.setAttribute('height', 16);
+                    bgRect.setAttribute('x', midX - 35);
+                    bgRect.setAttribute('y', midY - 10);
+                    bgRect.setAttribute('width', 70);
+                    bgRect.setAttribute('height', 20);
                     bgRect.setAttribute('rx', 4);
                     svg.appendChild(bgRect);
 
@@ -1677,7 +1785,7 @@
                     <div class="empty-state-icon">⚙️</div>
                     <h3>Properties</h3>
                     <p>Select a component to edit its properties</p>
-                    <p style="margin-top: 1rem; font-size: 0.75rem;">💡 Tip: Click connection points to create edges between nodes</p>
+                    <p style="margin-top: 1rem; font-size: 0.75rem;">💡 <strong>Tip:</strong> Click & drag from purple connection points (each node has 4: ⬆️➡️⬇️⬅️)</p>
                 </div>
             `;
         }
@@ -2389,7 +2497,8 @@
                         <div class="empty-state-icon">🎨</div>
                         <h3>Start Building Your Integration</h3>
                         <p>Drag systems and integration patterns from the left panel</p>
-                        <p style="margin-top: 0.5rem;">Click connection points and drag to create edges</p>
+                        <p style="margin-top: 0.5rem;"><strong>Create Edges:</strong> Click & drag from any purple connection point</p>
+                        <p style="margin-top: 0.25rem;">Each node has 4 connection points (⬆️➡️⬇️⬅️)</p>
                         <p style="margin-top: 0.5rem;">Or load an example to get started quickly</p>
                     </div>
                 `;
