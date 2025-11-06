@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC4 Integration Modeller - Phase 2: Visual Designer & Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --bg-main: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            margin-left: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: var(--bg-secondary);
+        }
+
+        .tab.active {
+            color: var(--purple);
+            border-bottom-color: var(--purple);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Canvas/Designer Styles */
+        .designer-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            height: calc(100vh - 120px);
+        }
+
+        .palette {
+            background: white;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .palette h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .palette-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .palette-item:hover {
+            background: var(--bg-secondary);
+            border-color: var(--purple);
+            transform: translateX(4px);
+        }
+
+        .palette-item:active {
+            cursor: grabbing;
+        }
+
+        .palette-icon {
+            font-size: 1.5rem;
+        }
+
+        .canvas {
+            background:
+                linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .canvas-node {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-width: 150px;
+            cursor: move;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .canvas-node:hover {
+            border-color: var(--purple);
+            box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .canvas-node.selected {
+            border-color: var(--purple);
+            border-width: 3px;
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .node-icon {
+            font-size: 1.5rem;
+        }
+
+        .node-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .node-type {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .connection-point {
+            width: 12px;
+            height: 12px;
+            background: var(--purple);
+            border: 2px solid white;
+            border-radius: 50%;
+            position: absolute;
+            cursor: crosshair;
+        }
+
+        .connection-point.input {
+            top: 50%;
+            left: -6px;
+            transform: translateY(-50%);
+        }
+
+        .connection-point.output {
+            top: 50%;
+            right: -6px;
+            transform: translateY(-50%);
+        }
+
+        .properties-panel {
+            background: white;
+            border-left: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .properties-panel h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            font-family: monospace;
+        }
+
+        /* Catalog Styles */
+        .catalog-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .filter-btn.active {
+            background: var(--purple);
+            color: white;
+            border-color: var(--purple);
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .integration-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .integration-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-pattern {
+            padding: 0.25rem 0.75rem;
+            background: var(--purple);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        /* JSON Editor */
+        .editor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .editor-panel {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .editor-panel h3 {
+            margin-bottom: 1rem;
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 500px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            background: var(--bg-dark);
+            color: #e2e8f0;
+        }
+
+        .preview-panel {
+            background: var(--bg-secondary);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            min-height: 500px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7c3aed;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .designer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .palette, .properties-panel {
+                display: none;
+            }
+
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🎨 BAC4 Integration Modeller <span class="badge">Phase 2: Visual Designer</span></h1>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="designer">🎨 Visual Designer</button>
+        <button class="tab" data-tab="catalog">📚 Integration Catalog</button>
+        <button class="tab" data-tab="editor">📝 JSON Editor</button>
+    </div>
+
+    <!-- Visual Designer Tab -->
+    <div id="designer" class="tab-content active">
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="saveDesign()">💾 Save</button>
+            <button class="btn btn-success" onclick="exportDesign()">📤 Export</button>
+            <button class="btn btn-secondary" onclick="clearCanvas()">🗑️ Clear</button>
+            <button class="btn btn-secondary" onclick="autoLayout()">📐 Auto Layout</button>
+        </div>
+
+        <div class="designer-container">
+            <!-- Component Palette -->
+            <div class="palette">
+                <h3>Systems</h3>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="🖥️">
+                    <span class="palette-icon">🖥️</span>
+                    <span>Application</span>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="🗄️">
+                    <span class="palette-icon">🗄️</span>
+                    <span>Database</span>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="☁️">
+                    <span class="palette-icon">☁️</span>
+                    <span>Cloud Service</span>
+                </div>
+
+                <h3 style="margin-top: 2rem;">Integration Patterns</h3>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="🔌">
+                    <span class="palette-icon">🔌</span>
+                    <span>REST API</span>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="📨">
+                    <span class="palette-icon">📨</span>
+                    <span>Kafka Stream</span>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="📁">
+                    <span class="palette-icon">📁</span>
+                    <span>File Transfer</span>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="💬">
+                    <span class="palette-icon">💬</span>
+                    <span>Message Queue</span>
+                </div>
+            </div>
+
+            <!-- Canvas -->
+            <div class="canvas" id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎨</div>
+                    <h3>Drag & Drop to Design Your Integration</h3>
+                    <p>Drag systems and integration patterns from the left panel onto this canvas</p>
+                </div>
+            </div>
+
+            <!-- Properties Panel -->
+            <div class="properties-panel" id="propertiesPanel">
+                <h3>Properties</h3>
+                <div id="propertiesContent">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                        Select a component on the canvas to edit its properties
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Tab -->
+    <div id="catalog" class="tab-content">
+        <div class="catalog-container">
+            <h2 style="margin-bottom: 1.5rem;">Integration Catalog</h2>
+
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="🔍 Search integrations..." id="catalogSearch" oninput="filterCatalog()">
+                <button class="btn btn-primary" onclick="createNew()">+ New Integration</button>
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" data-filter="rest-api" onclick="setFilter('rest-api')">REST API</button>
+                <button class="filter-btn" data-filter="event-stream" onclick="setFilter('event-stream')">Event Stream</button>
+                <button class="filter-btn" data-filter="file-transfer" onclick="setFilter('file-transfer')">File Transfer</button>
+                <button class="filter-btn" data-filter="messaging" onclick="setFilter('messaging')">Messaging</button>
+            </div>
+
+            <div class="catalog-grid" id="catalogGrid"></div>
+        </div>
+    </div>
+
+    <!-- JSON Editor Tab -->
+    <div id="editor" class="tab-content">
+        <div class="editor-container">
+            <h2 style="margin-bottom: 1.5rem;">JSON Editor</h2>
+
+            <div class="editor-layout">
+                <div class="editor-panel">
+                    <h3>Integration Definition</h3>
+                    <textarea class="code-editor" id="jsonEditor" oninput="updatePreview()"></textarea>
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="formatJSON()">✨ Format</button>
+                        <button class="btn btn-success" onclick="validateJSON()">✅ Validate</button>
+                    </div>
+                </div>
+
+                <div class="editor-panel">
+                    <h3>Live Preview</h3>
+                    <div class="preview-panel" id="jsonPreview">
+                        <p style="color: var(--text-secondary);">Preview will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample catalog data
+        const catalogData = [
+            {
+                id: '1',
+                title: 'Customer Data Sync',
+                description: 'Synchronize customer data between CRM and ERP systems',
+                pattern: 'rest-api',
+                systems: ['Salesforce', 'SAP ERP'],
+                tags: ['customers', 'real-time', 'bi-directional'],
+                owner: 'Integration Team',
+                status: 'active'
+            },
+            {
+                id: '2',
+                title: 'Order Event Processing',
+                description: 'Real-time order event streaming for fulfillment',
+                pattern: 'event-stream',
+                systems: ['E-Commerce', 'Fulfillment'],
+                tags: ['orders', 'kafka', 'real-time'],
+                owner: 'Platform Team',
+                status: 'active'
+            },
+            {
+                id: '3',
+                title: 'Daily Sales Reports',
+                description: 'Automated daily sales report file transfer',
+                pattern: 'file-transfer',
+                systems: ['POS System', 'Data Warehouse'],
+                tags: ['reports', 'batch', 'scheduled'],
+                owner: 'Data Team',
+                status: 'active'
+            },
+            {
+                id: '4',
+                title: 'Inventory Updates',
+                description: 'Real-time inventory synchronization across warehouses',
+                pattern: 'messaging',
+                systems: ['WMS', 'ERP'],
+                tags: ['inventory', 'mq', 'real-time'],
+                owner: 'Operations Team',
+                status: 'active'
+            }
+        ];
+
+        let nodes = [];
+        let selectedNode = null;
+        let currentFilter = 'all';
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+
+                if (targetTab === 'catalog') {
+                    renderCatalog();
+                }
+            });
+        });
+
+        // Drag and drop
+        let draggedItem = null;
+
+        document.querySelectorAll('.palette-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = {
+                    type: this.dataset.type,
+                    icon: this.dataset.icon,
+                    name: this.textContent.trim()
+                };
+            });
+        });
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function drop(e) {
+            e.preventDefault();
+
+            if (!draggedItem) return;
+
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+
+            const node = {
+                id: 'node-' + Date.now(),
+                type: draggedItem.type,
+                icon: draggedItem.icon,
+                name: draggedItem.name,
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                properties: {}
+            };
+
+            nodes.push(node);
+            renderCanvas();
+
+            // Clear empty state
+            const emptyState = canvas.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            draggedItem = null;
+        }
+
+        function renderCanvas() {
+            const canvas = document.getElementById('canvas');
+
+            // Remove old nodes but keep empty state if exists
+            canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
+
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'canvas-node';
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                nodeEl.innerHTML = `
+                    <div class="node-header">
+                        <span class="node-icon">${node.icon}</span>
+                        <div>
+                            <div class="node-title">${node.name}</div>
+                            <div class="node-type">${node.type}</div>
+                        </div>
+                    </div>
+                    <div class="connection-point input"></div>
+                    <div class="connection-point output"></div>
+                `;
+
+                nodeEl.onclick = () => selectNode(node);
+                nodeEl.onmousedown = (e) => startDrag(e, node);
+
+                canvas.appendChild(nodeEl);
+            });
+        }
+
+        function selectNode(node) {
+            selectedNode = node;
+
+            document.querySelectorAll('.canvas-node').forEach(n => n.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            showProperties(node);
+        }
+
+        function showProperties(node) {
+            const panel = document.getElementById('propertiesContent');
+
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" value="${node.name}" oninput="updateNodeProperty('name', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <input type="text" value="${node.type}" readonly style="background: var(--bg-secondary);">
+                </div>
+                ${node.type === 'integration' ? `
+                <div class="form-group">
+                    <label>Pattern</label>
+                    <select onchange="updateNodeProperty('pattern', this.value)">
+                        <option>rest-api</option>
+                        <option>event-stream</option>
+                        <option>file-transfer</option>
+                        <option>messaging</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Configuration</label>
+                    <textarea placeholder="Additional configuration..."></textarea>
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function updateNodeProperty(key, value) {
+            if (selectedNode) {
+                selectedNode[key] = value;
+                renderCanvas();
+            }
+        }
+
+        let dragOffset = { x: 0, y: 0 };
+        let isDragging = false;
+
+        function startDrag(e, node) {
+            if (e.target.classList.contains('connection-point')) return;
+
+            isDragging = true;
+            const nodeEl = e.currentTarget;
+            const rect = nodeEl.getBoundingClientRect();
+
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+
+            document.onmousemove = (e) => dragNode(e, node);
+            document.onmouseup = () => stopDrag();
+        }
+
+        function dragNode(e, node) {
+            if (!isDragging) return;
+
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+
+            node.x = e.clientX - rect.left - dragOffset.x;
+            node.y = e.clientY - rect.top - dragOffset.y;
+
+            renderCanvas();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.onmousemove = null;
+            document.onmouseup = null;
+        }
+
+        // Designer functions
+        function saveDesign() {
+            const data = JSON.stringify({ nodes }, null, 2);
+            localStorage.setItem('bac4-design', data);
+            alert('✅ Design saved successfully!');
+        }
+
+        function exportDesign() {
+            const data = JSON.stringify({ nodes }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'integration-design.json';
+            a.click();
+        }
+
+        function clearCanvas() {
+            if (confirm('Clear all nodes from canvas?')) {
+                nodes = [];
+                renderCanvas();
+                location.reload();
+            }
+        }
+
+        function autoLayout() {
+            const spacing = 200;
+            nodes.forEach((node, idx) => {
+                node.x = 100 + (idx % 3) * spacing;
+                node.y = 100 + Math.floor(idx / 3) * spacing;
+            });
+            renderCanvas();
+        }
+
+        // Catalog functions
+        function renderCatalog() {
+            const grid = document.getElementById('catalogGrid');
+            const search = document.getElementById('catalogSearch').value.toLowerCase();
+
+            let filtered = catalogData.filter(item => {
+                const matchesSearch = !search ||
+                    item.title.toLowerCase().includes(search) ||
+                    item.description.toLowerCase().includes(search);
+                const matchesFilter = currentFilter === 'all' || item.pattern === currentFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="integration-card" onclick="viewIntegration('${item.id}')">
+                    <div class="card-header">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-pattern">${item.pattern}</div>
+                    </div>
+                    <div class="card-description">${item.description}</div>
+                    <div class="card-meta">
+                        <span>👤 ${item.owner}</span>
+                        <span>🔗 ${item.systems.join(' → ')}</span>
+                    </div>
+                    <div class="card-tags">
+                        ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCatalog() {
+            renderCatalog();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderCatalog();
+        }
+
+        function viewIntegration(id) {
+            alert('Opening integration: ' + id);
+        }
+
+        function createNew() {
+            document.querySelector('.tab[data-tab="designer"]').click();
+        }
+
+        // JSON Editor functions
+        function updatePreview() {
+            const editor = document.getElementById('jsonEditor');
+            const preview = document.getElementById('jsonPreview');
+
+            try {
+                const data = JSON.parse(editor.value);
+                preview.innerHTML = `
+                    <h4>✅ Valid JSON</h4>
+                    <pre style="font-size: 0.75rem; color: var(--text-secondary);">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (e) {
+                preview.innerHTML = `<p style="color: var(--danger);">❌ Invalid JSON: ${e.message}</p>`;
+            }
+        }
+
+        function formatJSON() {
+            const editor = document.getElementById('jsonEditor');
+            try {
+                const data = JSON.parse(editor.value);
+                editor.value = JSON.stringify(data, null, 2);
+                updatePreview();
+            } catch (e) {
+                alert('Cannot format invalid JSON');
+            }
+        }
+
+        function validateJSON() {
+            const editor = document.getElementById('jsonEditor');
+            try {
+                JSON.parse(editor.value);
+                alert('✅ JSON is valid!');
+            } catch (e) {
+                alert('❌ Invalid JSON: ' + e.message);
+            }
+        }
+
+        // Load saved design on page load
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('bac4-design');
+            if (saved) {
+                const data = JSON.parse(saved);
+                nodes = data.nodes || [];
+                renderCanvas();
+            }
+
+            // Sample JSON in editor
+            document.getElementById('jsonEditor').value = JSON.stringify({
+                version: "1.0.0",
+                info: {
+                    title: "Sample Integration",
+                    version: "1.0.0"
+                },
+                systems: {},
+                integrations: []
+            }, null, 2);
+        });
+    </script>
+</body>
+</html>
