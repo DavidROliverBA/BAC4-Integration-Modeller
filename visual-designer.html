@@ -1272,13 +1272,7 @@
             document.addEventListener('mouseup', () => {
                 isPanning = false;
                 canvas.classList.remove('grabbing');
-
-                // End connection creation
-                if (connectionStart && tempConnection) {
-                    if (tempConnection) tempConnection.remove();
-                    connectionStart = null;
-                    tempConnection = null;
-                }
+                // Note: Connection cleanup is handled by onConnectionEnd
             });
 
             // Zoom with mouse wheel
@@ -1628,7 +1622,15 @@
         }
 
         function updateTempConnection(x, y) {
-            // Implementation for visual feedback during connection creation
+            if (!connectionStart || !tempConnection) return;
+
+            const startNode = connectionStart.node;
+            const startCoords = getConnectionPointCoordinates(startNode, connectionStart.position);
+
+            tempConnection.setAttribute('x1', startCoords.x);
+            tempConnection.setAttribute('y1', startCoords.y);
+            tempConnection.setAttribute('x2', x);
+            tempConnection.setAttribute('y2', y);
         }
 
         function createConnectionBetweenNodes(node1, node2) {
