@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC4 Integration Modeller - Complete Application</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --orange: #f97316;
+            --bg-main: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-secondary { background: white; color: var(--primary); }
+        .btn-secondary:hover { background: var(--bg-secondary); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover { background: var(--bg-secondary); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Visual Designer */
+        .designer-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr 320px;
+            height: calc(100vh - 180px);
+            background: white;
+        }
+
+        .palette {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .palette h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .palette-item {
+            padding: 0.875rem;
+            margin-bottom: 0.75rem;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .palette-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .palette-item:active { cursor: grabbing; }
+
+        .palette-icon { font-size: 1.75rem; }
+
+        .canvas {
+            background: 
+                linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+            overflow: auto;
+            min-height: 600px;
+        }
+
+        .canvas-node {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            min-width: 180px;
+            cursor: move;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: all 0.2s;
+        }
+
+        .canvas-node:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);
+        }
+
+        .canvas-node.selected {
+            border-color: var(--primary);
+            border-width: 3px;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .node-icon { font-size: 1.75rem; }
+        .node-title { font-weight: 600; font-size: 0.9375rem; }
+        .node-type { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; }
+
+        .connection-point {
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            position: absolute;
+            cursor: crosshair;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .connection-point.input { top: 50%; left: -7px; transform: translateY(-50%); }
+        .connection-point.output { top: 50%; right: -7px; transform: translateY(-50%); }
+
+        .properties-panel {
+            background: white;
+            border-left: 1px solid var(--border);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .properties-panel h3 {
+            font-size: 1.125rem;
+            margin-bottom: 1.25rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        /* Pattern Library */
+        .pattern-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .pattern-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pattern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--purple));
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .pattern-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .pattern-card:hover::before { transform: scaleX(1); }
+
+        .pattern-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .pattern-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .pattern-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+        }
+
+        .pattern-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pattern-features li {
+            padding: 0.625rem 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+        }
+
+        .pattern-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+
+        /* Catalog */
+        .catalog-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.625rem 1.25rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .integration-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.75rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .integration-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.875rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .card-pattern {
+            padding: 0.375rem 0.875rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .card-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalSlideIn 0.3s;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: var(--bg-secondary);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            transform: rotate(90deg);
+        }
+
+        .output-panel {
+            background: var(--bg-dark);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .output-panel pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .designer-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .palette,
+            .properties-panel {
+                display: none;
+            }
+
+            .pattern-grid,
+            .catalog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Utilities */
+        .mt-2 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .flex { display: flex; }
+        .gap-2 { gap: 1rem; }
+        .justify-end { justify-content: flex-end; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🚀 BAC4 Integration Modeller</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="importJSON()">📥 Import</button>
+            <button class="btn btn-secondary" onclick="exportJSON()">📤 Export</button>
+            <button class="btn btn-success" onclick="saveAll()">💾 Save</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" data-tab="designer">🎨 Visual Designer</button>
+        <button class="tab" data-tab="patterns">🔌 Pattern Library</button>
+        <button class="tab" data-tab="catalog">📚 Catalog</button>
+        <button class="tab" data-tab="validate">✅ Validate & Generate</button>
+    </div>
+
+    <!-- Visual Designer Tab -->
+    <div id="designer" class="tab-content active">
+        <div class="designer-layout">
+            <div class="palette">
+                <h3>Systems</h3>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="🖥️">
+                    <span class="palette-icon">🖥️</span>
+                    <div>
+                        <div style="font-weight: 600;">Application</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Internal system</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="🗄️">
+                    <span class="palette-icon">🗄️</span>
+                    <div>
+                        <div style="font-weight: 600;">Database</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Data store</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-icon="☁️">
+                    <span class="palette-icon">☁️</span>
+                    <div>
+                        <div style="font-weight: 600;">Cloud Service</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">External API</div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem;">Integrations</h3>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="🔌">
+                    <span class="palette-icon">🔌</span>
+                    <div>
+                        <div style="font-weight: 600;">REST API</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">HTTP/HTTPS</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="📨">
+                    <span class="palette-icon">📨</span>
+                    <div>
+                        <div style="font-weight: 600;">Kafka Stream</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Event-driven</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="📁">
+                    <span class="palette-icon">📁</span>
+                    <div>
+                        <div style="font-weight: 600;">File Transfer</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">SFTP/FTP</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-icon="💬">
+                    <span class="palette-icon">💬</span>
+                    <div>
+                        <div style="font-weight: 600;">Message Queue</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">RabbitMQ/MQ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas" id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎨</div>
+                    <h2>Design Your Integration Flow</h2>
+                    <p style="margin-top: 0.5rem;">Drag systems and integrations from the left panel to start designing</p>
+                    <div style="margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="loadExampleDesign()">📚 Load Example</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="properties-panel" id="propertiesPanel">
+                <h3>Properties</h3>
+                <div id="propertiesContent">
+                    <p style="color: var(--text-secondary); font-size: 0.9375rem;">
+                        Select a component on the canvas to edit its properties
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Library Tab -->
+    <div id="patterns" class="tab-content">
+        <div class="pattern-container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Integration Pattern Library</h1>
+            <p style="color: var(--text-secondary); font-size: 1.125rem; margin-bottom: 2rem;">
+                Choose a pattern below to configure your integration
+            </p>
+
+            <div class="pattern-grid">
+                <div class="pattern-card" onclick="openPatternConfig('rest-api')">
+                    <span class="pattern-icon">🔌</span>
+                    <h3 class="pattern-title">REST API</h3>
+                    <p class="pattern-subtitle">Synchronous HTTP Integration</p>
+                    <ul class="pattern-features">
+                        <li>GET, POST, PUT, DELETE operations</li>
+                        <li>OAuth2, JWT, API Key authentication</li>
+                        <li>Request/response transformation</li>
+                        <li>Automatic retry with backoff</li>
+                        <li>Pagination support</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('soap-api')">
+                    <span class="pattern-icon">🧼</span>
+                    <h3 class="pattern-title">SOAP API</h3>
+                    <p class="pattern-subtitle">Enterprise Web Services</p>
+                    <ul class="pattern-features">
+                        <li>SOAP 1.1 and 1.2 support</li>
+                        <li>WSDL-based service definitions</li>
+                        <li>WS-Security implementation</li>
+                        <li>MTOM binary attachments</li>
+                        <li>Legacy system compatibility</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('event-stream')">
+                    <span class="pattern-icon">📨</span>
+                    <h3 class="pattern-title">Event Stream</h3>
+                    <p class="pattern-subtitle">Real-time Event Processing</p>
+                    <ul class="pattern-features">
+                        <li>Kafka, Kinesis, Event Hub</li>
+                        <li>Consumer groups & partitions</li>
+                        <li>CloudEvents format support</li>
+                        <li>Stream processing capabilities</li>
+                        <li>Exactly-once semantics</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('messaging')">
+                    <span class="pattern-icon">💬</span>
+                    <h3 class="pattern-title">Message Queue</h3>
+                    <p class="pattern-subtitle">Asynchronous Messaging</p>
+                    <ul class="pattern-features">
+                        <li>RabbitMQ, ActiveMQ, IBM MQ</li>
+                        <li>Point-to-point & pub/sub</li>
+                        <li>Transaction support</li>
+                        <li>Dead letter queue handling</li>
+                        <li>Message acknowledgment</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('file-transfer')">
+                    <span class="pattern-icon">📁</span>
+                    <h3 class="pattern-title">File Transfer</h3>
+                    <p class="pattern-subtitle">Secure File Exchange</p>
+                    <ul class="pattern-features">
+                        <li>FTP, SFTP, FTPS, SCP protocols</li>
+                        <li>Cloud storage (S3, Azure, GCS)</li>
+                        <li>File polling & pattern matching</li>
+                        <li>Compression & encryption</li>
+                        <li>Archiving with retention</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('batch')">
+                    <span class="pattern-icon">⚙️</span>
+                    <h3 class="pattern-title">Batch Processing</h3>
+                    <p class="pattern-subtitle">High-Volume Data Processing</p>
+                    <ul class="pattern-features">
+                        <li>Chunk-based processing</li>
+                        <li>Parallel processing support</li>
+                        <li>Checkpointing & restart</li>
+                        <li>Aggregation & windowing</li>
+                        <li>Scheduled execution</li>
+                    </ul>
+                </div>
+
+                <div class="pattern-card" onclick="openPatternConfig('database-sync')">
+                    <span class="pattern-icon">🗄️</span>
+                    <h3 class="pattern-title">Database Sync</h3>
+                    <p class="pattern-subtitle">Data Replication & CDC</p>
+                    <ul class="pattern-features">
+                        <li>Full & incremental sync</li>
+                        <li>Change Data Capture (CDC)</li>
+                        <li>Conflict resolution strategies</li>
+                        <li>Bulk loading optimization</li>
+                        <li>Multi-database support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Tab -->
+    <div id="catalog" class="tab-content">
+        <div class="catalog-container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Integration Catalog</h1>
+            <p style="color: var(--text-secondary); font-size: 1.125rem; margin-bottom: 2rem;">
+                Browse, search, and manage your integration definitions
+            </p>
+
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="🔍 Search integrations by name, description, or tags..." 
+                    id="catalogSearch" oninput="filterCatalog()">
+                <button class="btn btn-primary" onclick="createNewIntegration()">+ New Integration</button>
+            </div>
+
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All Patterns</button>
+                <button class="filter-btn" data-filter="rest-api" onclick="setFilter('rest-api')">🔌 REST API</button>
+                <button class="filter-btn" data-filter="event-stream" onclick="setFilter('event-stream')">📨 Event Stream</button>
+                <button class="filter-btn" data-filter="file-transfer" onclick="setFilter('file-transfer')">📁 File Transfer</button>
+                <button class="filter-btn" data-filter="messaging" onclick="setFilter('messaging')">💬 Messaging</button>
+                <button class="filter-btn" data-filter="batch" onclick="setFilter('batch')">⚙️ Batch</button>
+            </div>
+
+            <div class="catalog-grid" id="catalogGrid"></div>
+        </div>
+    </div>
+
+    <!-- Validate & Generate Tab -->
+    <div id="validate" class="tab-content">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Validate & Generate Code</h1>
+            <p style="color: var(--text-secondary); font-size: 1.125rem; margin-bottom: 2rem;">
+                Validate your integration definition and generate implementation code
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div style="background: white; border-radius: 0.75rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Integration Definition</h2>
+                    <textarea id="validateInput" style="width: 100%; min-height: 500px; padding: 1rem; border: 1px solid var(--border); 
+                        border-radius: 0.5rem; font-family: 'Courier New', monospace; font-size: 0.875rem; resize: vertical;"
+                        placeholder="Paste your integration definition JSON here..."></textarea>
+                    <div class="flex gap-2 mt-2">
+                        <button class="btn btn-primary" onclick="validateAndGenerate()">🔍 Validate & Generate</button>
+                        <button class="btn btn-secondary" onclick="formatJSON()">✨ Format JSON</button>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 0.75rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem;">Results</h2>
+                    <div id="validateOutput" class="output-panel">
+Validation results and generated code will appear here...
+
+Click "Validate & Generate" to start.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Configuration Modal -->
+    <div id="patternModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePatternModal()">×</button>
+            <div id="patternModalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let nodes = [];
+        let selectedNode = null;
+        let currentFilter = 'all';
+        let draggedItem = null;
+        let currentDefinition = null;
+
+        // Sample catalog data
+        const catalogData = [
+            {
+                id: '1',
+                title: 'Customer Data Sync',
+                description: 'Synchronize customer data between Salesforce CRM and SAP ERP systems',
+                pattern: 'rest-api',
+                systems: ['Salesforce CRM', 'SAP ERP'],
+                tags: ['customers', 'real-time', 'bi-directional', 'critical'],
+                owner: 'Integration Team',
+                status: 'active'
+            },
+            {
+                id: '2',
+                title: 'Order Event Processing',
+                description: 'Real-time order event streaming for fulfillment system',
+                pattern: 'event-stream',
+                systems: ['E-Commerce Platform', 'Fulfillment System'],
+                tags: ['orders', 'kafka', 'real-time', 'event-driven'],
+                owner: 'Platform Team',
+                status: 'active'
+            },
+            {
+                id: '3',
+                title: 'Daily Sales Reports',
+                description: 'Automated daily sales report file transfer to data warehouse',
+                pattern: 'file-transfer',
+                systems: ['POS System', 'Data Warehouse'],
+                tags: ['reports', 'batch', 'scheduled', 'analytics'],
+                owner: 'Data Team',
+                status: 'active'
+            },
+            {
+                id: '4',
+                title: 'Inventory Updates',
+                description: 'Real-time inventory synchronization across warehouses',
+                pattern: 'messaging',
+                systems: ['Warehouse Management', 'ERP System'],
+                tags: ['inventory', 'mq', 'real-time', 'stock'],
+                owner: 'Operations Team',
+                status: 'active'
+            },
+            {
+                id: '5',
+                title: 'Product Catalog Sync',
+                description: 'Batch synchronization of product catalog from PIM to e-commerce',
+                pattern: 'batch',
+                systems: ['PIM System', 'E-Commerce'],
+                tags: ['products', 'batch', 'scheduled', 'catalog'],
+                owner: 'Product Team',
+                status: 'active'
+            },
+            {
+                id: '6',
+                title: 'Customer Database Replication',
+                description: 'CDC-based customer data replication between databases',
+                pattern: 'database-sync',
+                systems: ['PostgreSQL', 'MySQL'],
+                tags: ['database', 'cdc', 'real-time', 'replication'],
+                owner: 'DBA Team',
+                status: 'active'
+            }
+        ];
+
+        // Pattern definitions
+        const patterns = {
+            'rest-api': {
+                title: 'REST API Integration',
+                icon: '🔌',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'method', label: 'HTTP Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], required: true },
+                    { name: 'sourceUrl', label: 'Source URL', type: 'text', placeholder: 'https://api.source.com', required: true },
+                    { name: 'targetUrl', label: 'Target URL', type: 'text', placeholder: 'https://api.target.com', required: true },
+                    { name: 'authType', label: 'Authentication', type: 'select', options: ['None', 'API Key', 'OAuth2', 'JWT', 'Basic Auth'] },
+                    { name: 'timeout', label: 'Timeout (seconds)', type: 'number', default: 30 },
+                    { name: 'retryAttempts', label: 'Retry Attempts', type: 'number', default: 3 }
+                ]
+            },
+            'soap-api': {
+                title: 'SOAP API Integration',
+                icon: '🧼',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'wsdlUrl', label: 'WSDL URL', type: 'text', required: true },
+                    { name: 'operation', label: 'Operation Name', type: 'text', required: true },
+                    { name: 'soapVersion', label: 'SOAP Version', type: 'select', options: ['1.1', '1.2'], default: '1.2' }
+                ]
+            },
+            'event-stream': {
+                title: 'Event Stream Integration',
+                icon: '📨',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'provider', label: 'Provider', type: 'select', options: ['Kafka', 'AWS Kinesis', 'Azure Event Hub', 'Google Pub/Sub'], required: true },
+                    { name: 'sourceTopic', label: 'Source Topic', type: 'text', required: true },
+                    { name: 'targetTopic', label: 'Target Topic', type: 'text', required: true },
+                    { name: 'consumerGroup', label: 'Consumer Group', type: 'text' },
+                    { name: 'cloudEvents', label: 'Use CloudEvents', type: 'checkbox', default: true }
+                ]
+            },
+            'messaging': {
+                title: 'Message Queue Integration',
+                icon: '💬',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'provider', label: 'MQ Provider', type: 'select', options: ['RabbitMQ', 'ActiveMQ', 'IBM MQ', 'AWS SQS'], required: true },
+                    { name: 'queueName', label: 'Queue Name', type: 'text', required: true },
+                    { name: 'durable', label: 'Durable Queue', type: 'checkbox', default: true }
+                ]
+            },
+            'file-transfer': {
+                title: 'File Transfer Integration',
+                icon: '📁',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'protocol', label: 'Protocol', type: 'select', options: ['SFTP', 'FTP', 'FTPS', 'S3', 'Azure Blob'], required: true },
+                    { name: 'sourceDir', label: 'Source Directory', type: 'text', required: true },
+                    { name: 'targetDir', label: 'Target Directory', type: 'text', required: true },
+                    { name: 'filePattern', label: 'File Pattern', type: 'text', placeholder: '*.csv' },
+                    { name: 'compression', label: 'Enable Compression', type: 'checkbox' }
+                ]
+            },
+            'batch': {
+                title: 'Batch Processing Integration',
+                icon: '⚙️',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'schedule', label: 'Cron Schedule', type: 'text', placeholder: '0 2 * * *' },
+                    { name: 'chunkSize', label: 'Chunk Size', type: 'number', default: 1000 },
+                    { name: 'parallelism', label: 'Parallelism', type: 'number', default: 4 }
+                ]
+            },
+            'database-sync': {
+                title: 'Database Synchronization',
+                icon: '🗄️',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'syncType', label: 'Sync Type', type: 'select', options: ['Full', 'Incremental', 'CDC'], required: true },
+                    { name: 'sourceDB', label: 'Source Database', type: 'text', required: true },
+                    { name: 'targetDB', label: 'Target Database', type: 'text', required: true },
+                    { name: 'table', label: 'Table Name', type: 'text', required: true }
+                ]
+            }
+        };
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initializeTabs();
+            renderCatalog();
+            loadFromLocalStorage();
+        });
+
+        // Tab Management
+        function initializeTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                    if (targetTab === 'catalog') renderCatalog();
+                });
+            });
+        }
+
+        // Drag & Drop for Designer
+        document.querySelectorAll('.palette-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = {
+                    type: this.dataset.type,
+                    icon: this.dataset.icon,
+                    name: this.textContent.trim().split('\n')[0]
+                };
+            });
+        });
+
+        function allowDrop(e) { e.preventDefault(); }
+
+        function drop(e) {
+            e.preventDefault();
+            if (!draggedItem) return;
+
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            const node = {
+                id: 'node-' + Date.now(),
+                type: draggedItem.type,
+                icon: draggedItem.icon,
+                name: draggedItem.name,
+                x: e.clientX - rect.left - 90,
+                y: e.clientY - rect.top - 40,
+                properties: {}
+            };
+
+            nodes.push(node);
+            renderCanvas();
+
+            const emptyState = canvas.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            draggedItem = null;
+        }
+
+        function renderCanvas() {
+            const canvas = document.getElementById('canvas');
+            canvas.querySelectorAll('.canvas-node').forEach(n => n.remove());
+
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'canvas-node';
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                nodeEl.innerHTML = `
+                    <div class="node-header">
+                        <span class="node-icon">${node.icon}</span>
+                        <div>
+                            <div class="node-title">${node.name}</div>
+                            <div class="node-type">${node.type}</div>
+                        </div>
+                    </div>
+                    <div class="connection-point input"></div>
+                    <div class="connection-point output"></div>
+                `;
+                nodeEl.onclick = () => selectNode(node, nodeEl);
+                nodeEl.onmousedown = (e) => startDrag(e, node);
+                canvas.appendChild(nodeEl);
+            });
+        }
+
+        function selectNode(node, el) {
+            selectedNode = node;
+            document.querySelectorAll('.canvas-node').forEach(n => n.classList.remove('selected'));
+            el.classList.add('selected');
+            showProperties(node);
+        }
+
+        function showProperties(node) {
+            document.getElementById('propertiesContent').innerHTML = `
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" value="${node.name}" oninput="updateNodeProperty('name', this.value)">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <input type="text" value="${node.type}" readonly style="background: var(--bg-secondary);">
+                </div>
+            `;
+        }
+
+        function updateNodeProperty(key, value) {
+            if (selectedNode) {
+                selectedNode[key] = value;
+                renderCanvas();
+            }
+        }
+
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        function startDrag(e, node) {
+            if (e.target.classList.contains('connection-point')) return;
+            isDragging = true;
+            const rect = e.currentTarget.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            document.onmousemove = (e) => dragNode(e, node);
+            document.onmouseup = stopDrag;
+        }
+
+        function dragNode(e, node) {
+            if (!isDragging) return;
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            node.x = e.clientX - rect.left - dragOffset.x;
+            node.y = e.clientY - rect.top - dragOffset.y;
+            renderCanvas();
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.onmousemove = null;
+            document.onmouseup = null;
+        }
+
+        function loadExampleDesign() {
+            nodes = [
+                { id: 'node-1', type: 'system', icon: '🖥️', name: 'CRM System', x: 100, y: 200, properties: {} },
+                { id: 'node-2', type: 'integration', icon: '🔌', name: 'REST API', x: 400, y: 200, properties: {} },
+                { id: 'node-3', type: 'system', icon: '🗄️', name: 'ERP System', x: 700, y: 200, properties: {} }
+            ];
+            document.querySelector('.empty-state')?.remove();
+            renderCanvas();
+        }
+
+        // Pattern Configuration
+        function openPatternConfig(patternType) {
+            const pattern = patterns[patternType];
+            const modal = document.getElementById('patternModal');
+            const body = document.getElementById('patternModalBody');
+
+            let html = `
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <span style="font-size: 4rem;">${pattern.icon}</span>
+                    <h2 style="margin-top: 1rem;">${pattern.title}</h2>
+                </div>
+                <form id="patternForm" onsubmit="generatePatternConfig(event, '${patternType}')">
+            `;
+
+            pattern.fields.forEach(field => {
+                html += '<div class="form-group">';
+                html += `<label>${field.label}${field.required ? ' <span style="color: var(--danger);">*</span>' : ''}</label>`;
+
+                if (field.type === 'select') {
+                    html += `<select name="${field.name}" ${field.required ? 'required' : ''}>`;
+                    field.options.forEach(opt => {
+                        html += `<option value="${opt}">${opt}</option>`;
+                    });
+                    html += '</select>';
+                } else if (field.type === 'checkbox') {
+                    html += `<input type="checkbox" name="${field.name}" ${field.default ? 'checked' : ''}>`;
+                } else {
+                    html += `<input type="${field.type}" name="${field.name}" ${field.required ? 'required' : ''}
+                        placeholder="${field.placeholder || ''}" value="${field.default || ''}">`;
+                }
+                html += '</div>';
+            });
+
+            html += `
+                <div class="flex gap-2 justify-end mt-2">
+                    <button type="button" class="btn btn-secondary" onclick="closePatternModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Configuration</button>
+                </div>
+                </form>
+                <div id="patternOutput"></div>
+            `;
+
+            body.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function generatePatternConfig(event, patternType) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const config = {};
+            for (let [key, value] of formData.entries()) {
+                config[key] = value;
+            }
+
+            const definition = {
+                version: "1.0.0",
+                info: {
+                    title: config.name || "Integration",
+                    version: "1.0.0"
+                },
+                systems: {
+                    source: { name: "Source System", type: "application" },
+                    target: { name: "Target System", type: "application" }
+                },
+                integrations: [{
+                    id: (config.name || "integration").toLowerCase().replace(/\s+/g, '-'),
+                    name: config.name || "Integration",
+                    pattern: patternType,
+                    source: { system: "source" },
+                    target: { system: "target" },
+                    config: config
+                }]
+            };
+
+            document.getElementById('patternOutput').innerHTML = `
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Generated Configuration</h3>
+                <div class="output-panel"><pre>${JSON.stringify(definition, null, 2)}</pre></div>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-primary" onclick="downloadConfig('${patternType}')">💾 Download</button>
+                    <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Copy</button>
+                    <button class="btn btn-success" onclick="loadToDesigner()">🎨 Open in Designer</button>
+                </div>
+            `;
+
+            window.currentDefinition = definition;
+        }
+
+        function closePatternModal() {
+            document.getElementById('patternModal').classList.remove('active');
+        }
+
+        function downloadConfig(patternType) {
+            const json = JSON.stringify(window.currentDefinition, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${patternType}-integration.json`;
+            a.click();
+        }
+
+        function copyToClipboard() {
+            const json = JSON.stringify(window.currentDefinition, null, 2);
+            navigator.clipboard.writeText(json).then(() => alert('✅ Copied to clipboard!'));
+        }
+
+        function loadToDesigner() {
+            closePatternModal();
+            document.querySelector('.tab[data-tab="designer"]').click();
+        }
+
+        // Catalog
+        function renderCatalog() {
+            const grid = document.getElementById('catalogGrid');
+            const search = document.getElementById('catalogSearch').value.toLowerCase();
+            let filtered = catalogData.filter(item => {
+                const matchesSearch = !search || item.title.toLowerCase().includes(search) || 
+                    item.description.toLowerCase().includes(search) || item.tags.some(t => t.includes(search));
+                const matchesFilter = currentFilter === 'all' || item.pattern === currentFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="integration-card" onclick="viewIntegration('${item.id}')">
+                    <div class="card-header">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-pattern">${item.pattern}</div>
+                    </div>
+                    <div class="card-description">${item.description}</div>
+                    <div class="card-meta">
+                        <span>👤 ${item.owner}</span>
+                        <span>🔗 ${item.systems.join(' → ')}</span>
+                    </div>
+                    <div class="card-tags">
+                        ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCatalog() { renderCatalog(); }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderCatalog();
+        }
+
+        function viewIntegration(id) {
+            alert('Opening integration details for ID: ' + id);
+        }
+
+        function createNewIntegration() {
+            document.querySelector('.tab[data-tab="patterns"]').click();
+        }
+
+        // Validate & Generate
+        function validateAndGenerate() {
+            const input = document.getElementById('validateInput').value;
+            const output = document.getElementById('validateOutput');
+
+            if (!input.trim()) {
+                output.innerHTML = '<span style="color: var(--warning);">⚠️ Please provide an integration definition</span>';
+                return;
+            }
+
+            try {
+                const definition = JSON.parse(input);
+                const errors = [];
+
+                // Basic validation
+                if (!definition.version) errors.push('Missing required field: version');
+                if (!definition.info) errors.push('Missing required field: info');
+                if (!definition.integrations) errors.push('Missing required field: integrations');
+
+                if (errors.length === 0) {
+                    output.innerHTML = `<span style="color: var(--success);">✅ Validation Passed!</span>\n\nYour integration definition is valid.\n\nGenerated code snippet:\n\n` +
+                        generateCodeSnippet(definition);
+                } else {
+                    output.innerHTML = `<span style="color: var(--danger);">❌ Validation Failed</span>\n\nErrors:\n` + 
+                        errors.map(e => `• ${e}`).join('\n');
+                }
+            } catch (e) {
+                output.innerHTML = `<span style="color: var(--danger);">❌ Invalid JSON</span>\n\n${e.message}`;
+            }
+        }
+
+        function generateCodeSnippet(definition) {
+            const integration = definition.integrations[0];
+            if (!integration) return '';
+
+            return `\n// Apache Camel Route\n@Component\npublic class ${toPascalCase(integration.id)}Route extends RouteBuilder {\n    @Override\n    public void configure() throws Exception {\n        from("direct:${integration.id}")\n            .log("Processing ${integration.name}")\n            .to("${integration.target?.system || 'target'}");\n    }\n}`;
+        }
+
+        function formatJSON() {
+            const input = document.getElementById('validateInput');
+            try {
+                const obj = JSON.parse(input.value);
+                input.value = JSON.stringify(obj, null, 2);
+            } catch (e) {
+                alert('Cannot format invalid JSON');
+            }
+        }
+
+        // Utility functions
+        function toPascalCase(str) {
+            return str.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+        }
+
+        // Import/Export
+        function importJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    document.getElementById('validateInput').value = event.target.result;
+                    alert('✅ File imported successfully!');
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function exportJSON() {
+            const data = document.getElementById('validateInput').value || JSON.stringify(window.currentDefinition || {}, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'integration-definition.json';
+            a.click();
+        }
+
+        function saveAll() {
+            localStorage.setItem('bac4-nodes', JSON.stringify(nodes));
+            localStorage.setItem('bac4-definition', document.getElementById('validateInput').value);
+            alert('✅ Saved successfully!');
+        }
+
+        function loadFromLocalStorage() {
+            const savedNodes = localStorage.getItem('bac4-nodes');
+            const savedDefinition = localStorage.getItem('bac4-definition');
+            if (savedNodes) {
+                nodes = JSON.parse(savedNodes);
+                if (nodes.length > 0) {
+                    document.querySelector('.empty-state')?.remove();
+                    renderCanvas();
+                }
+            }
+            if (savedDefinition) {
+                document.getElementById('validateInput').value = savedDefinition;
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('patternModal').addEventListener('click', function(e) {
+            if (e.target === this) closePatternModal();
+        });
+    </script>
+</body>
+</html>
