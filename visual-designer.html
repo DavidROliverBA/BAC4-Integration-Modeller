@@ -431,6 +431,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            overflow: visible;
         }
 
         .connection-line {
@@ -845,7 +846,7 @@
             font-weight: 600;
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
             }
@@ -1478,7 +1479,12 @@
                 canvasInner.appendChild(nodeEl);
             });
 
-            renderConnections();
+            // Use requestAnimationFrame to ensure DOM layout is complete before calculating connections
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    renderConnections();
+                });
+            });
         }
 
         // ============ Node Dragging ============
@@ -1556,10 +1562,35 @@
         }
 
         function getConnectionPointCoordinates(node, position) {
-            // Calculate the center point of each connection based on position
-            const nodeWidth = node.type === 'system' ? 160 : 180;
-            const nodeHeight = node.type === 'system' ? 120 : 110;
+            // Get the actual rendered dimensions and position from the DOM element
+            const nodeEl = document.querySelector(`[data-node-id="${node.id}"]`);
 
+            if (!nodeEl) {
+                // Fallback if element not found
+                const nodeWidth = node.type === 'system' ? 160 : 180;
+                const nodeHeight = node.type === 'system' ? 120 : 110;
+
+                switch(position) {
+                    case 'top':
+                        return { x: node.x + nodeWidth / 2, y: node.y };
+                    case 'right':
+                        return { x: node.x + nodeWidth, y: node.y + nodeHeight / 2 };
+                    case 'bottom':
+                        return { x: node.x + nodeWidth / 2, y: node.y + nodeHeight };
+                    case 'left':
+                        return { x: node.x, y: node.y + nodeHeight / 2 };
+                    default:
+                        return { x: node.x + nodeWidth / 2, y: node.y + nodeHeight / 2 };
+                }
+            }
+
+            // Get the actual rendered dimensions
+            const rect = nodeEl.getBoundingClientRect();
+            const nodeWidth = nodeEl.offsetWidth;
+            const nodeHeight = nodeEl.offsetHeight;
+
+            // Since both the SVG and nodes are in the same coordinate space (canvasInner),
+            // we use the node's position directly plus offsets
             switch(position) {
                 case 'top':
                     return { x: node.x + nodeWidth / 2, y: node.y };
