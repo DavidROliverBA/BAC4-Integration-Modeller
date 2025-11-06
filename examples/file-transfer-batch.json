@@ -1,0 +1,207 @@
+{
+  "version": "1.0.0",
+  "info": {
+    "title": "Daily Sales Report Integration",
+    "version": "1.0.0",
+    "description": "Batch file transfer of daily sales reports from POS systems to data warehouse",
+    "tags": ["batch", "file-transfer", "reporting"]
+  },
+  "systems": {
+    "pos-system": {
+      "name": "Point of Sale System",
+      "type": "application",
+      "description": "Retail POS system",
+      "owner": "Retail Operations",
+      "environment": "production"
+    },
+    "data-warehouse": {
+      "name": "Enterprise Data Warehouse",
+      "type": "database",
+      "description": "Central data warehouse for analytics",
+      "owner": "Data Team",
+      "environment": "production"
+    },
+    "sftp-server": {
+      "name": "Secure File Transfer Server",
+      "type": "service",
+      "description": "SFTP server for file exchange",
+      "owner": "Infrastructure Team",
+      "environment": "production"
+    }
+  },
+  "integrations": [
+    {
+      "id": "daily-sales-file-transfer",
+      "name": "Daily Sales File Transfer",
+      "description": "Transfer daily sales CSV files from SFTP to data warehouse",
+      "pattern": "file-transfer",
+      "source": {
+        "system": "sftp-server",
+        "protocol": "sftp",
+        "connection": {
+          "host": "sftp.example.com",
+          "port": 22,
+          "path": "/exports/sales"
+        },
+        "format": "csv"
+      },
+      "target": {
+        "system": "data-warehouse",
+        "protocol": "jdbc",
+        "connection": {
+          "url": "jdbc:postgresql://dwh.example.com:5432/analytics",
+          "database": "analytics"
+        },
+        "format": "csv"
+      },
+      "trigger": {
+        "type": "schedule",
+        "schedule": {
+          "cron": "0 2 * * *",
+          "timezone": "America/New_York"
+        }
+      },
+      "transformation": {
+        "type": "mapping",
+        "mapping": {
+          "transaction_id": "$.TransactionID",
+          "store_id": "$.StoreID",
+          "pos_terminal": "$.Terminal",
+          "timestamp": "$.Timestamp",
+          "items": "$.Items",
+          "subtotal": "$.Subtotal",
+          "tax": "$.Tax",
+          "total": "$.Total",
+          "payment_method": "$.PaymentMethod"
+        }
+      },
+      "errorHandling": {
+        "retry": {
+          "maxAttempts": 3,
+          "backoff": "linear",
+          "delay": "10m"
+        },
+        "alerting": {
+          "enabled": true,
+          "channels": ["email"],
+          "recipients": ["data-team@example.com"]
+        },
+        "fallback": {
+          "enabled": true,
+          "action": "skip"
+        }
+      },
+      "metadata": {
+        "sla": {
+          "latency": "1h",
+          "throughput": "1GB/hour",
+          "availability": "99.5%"
+        },
+        "owner": "Data Integration Team",
+        "tags": ["batch", "daily", "sales"]
+      },
+      "config": {
+        "protocol": "sftp",
+        "directory": "/exports/sales",
+        "filePattern": "sales_*.csv",
+        "polling": {
+          "enabled": true,
+          "interval": "5m"
+        },
+        "compression": {
+          "enabled": true,
+          "format": "gzip"
+        },
+        "encryption": {
+          "enabled": false
+        },
+        "archiving": {
+          "enabled": true,
+          "directory": "/archives/sales",
+          "retention": "365d"
+        },
+        "fileProcessing": {
+          "moveAfterProcessing": true,
+          "deleteAfterProcessing": false,
+          "targetDirectory": "/processed"
+        }
+      }
+    },
+    {
+      "id": "sales-data-batch-load",
+      "name": "Sales Data Batch Load",
+      "description": "Batch load sales data into data warehouse tables",
+      "pattern": "batch",
+      "source": {
+        "system": "sftp-server",
+        "format": "csv"
+      },
+      "target": {
+        "system": "data-warehouse",
+        "protocol": "jdbc",
+        "connection": {
+          "database": "analytics"
+        }
+      },
+      "trigger": {
+        "type": "file-arrival"
+      },
+      "transformation": {
+        "type": "script",
+        "script": {
+          "language": "python",
+          "file": "transformations/sales_transform.py"
+        }
+      },
+      "errorHandling": {
+        "retry": {
+          "maxAttempts": 2,
+          "backoff": "fixed",
+          "delay": "30m"
+        }
+      },
+      "metadata": {
+        "tags": ["etl", "batch-load"]
+      },
+      "config": {
+        "chunkSize": 10000,
+        "parallelism": 4,
+        "ordering": "preserve",
+        "checkpointing": {
+          "enabled": true,
+          "interval": "5m"
+        },
+        "aggregation": {
+          "enabled": false
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "SalesRecordSchema": {
+        "type": "object",
+        "required": ["TransactionID", "StoreID", "Timestamp", "Total"],
+        "properties": {
+          "TransactionID": {"type": "string"},
+          "StoreID": {"type": "string"},
+          "Terminal": {"type": "string"},
+          "Timestamp": {"type": "string", "format": "date-time"},
+          "Items": {"type": "string"},
+          "Subtotal": {"type": "number"},
+          "Tax": {"type": "number"},
+          "Total": {"type": "number"},
+          "PaymentMethod": {"type": "string", "enum": ["cash", "credit", "debit", "mobile"]}
+        }
+      }
+    },
+    "securitySchemes": {
+      "ssh-key": {
+        "type": "apiKey",
+        "name": "SSH Key",
+        "in": "header",
+        "description": "SSH key-based authentication for SFTP"
+      }
+    }
+  }
+}

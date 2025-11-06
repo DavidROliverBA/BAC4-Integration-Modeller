@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC4 Integration Modeller - Phase 3: Extended Patterns</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --orange: #f97316;
+            --bg-main: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            margin-left: 1rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .pattern-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pattern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .pattern-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            border-color: var(--orange);
+        }
+
+        .pattern-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .pattern-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .pattern-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .pattern-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pattern-features li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pattern-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--orange);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-help {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--orange);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ea580c;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .output-panel {
+            background: var(--bg-dark);
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.375rem;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .output-panel pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--orange);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .pattern-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 BAC4 Integration Modeller <span class="badge">Phase 3: Extended Patterns</span></h1>
+        <p>Complete Integration Pattern Library - File Transfer, Batch, Messaging, SOAP, Database Sync</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">7</div>
+                <div class="stat-label">Integration Patterns</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12+</div>
+                <div class="stat-label">Supported Protocols</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Code Generators</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">Extensibility</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 1.5rem;">All Integration Patterns</h2>
+
+        <div class="pattern-grid">
+            <!-- REST API -->
+            <div class="pattern-card" onclick="openPatternConfig('rest-api')">
+                <div class="pattern-icon">🔌</div>
+                <div class="pattern-title">REST API</div>
+                <div class="pattern-subtitle">Synchronous HTTP-based Integration</div>
+                <ul class="pattern-features">
+                    <li>All HTTP methods (GET, POST, PUT, DELETE)</li>
+                    <li>OAuth2, JWT, API Key authentication</li>
+                    <li>Request/response transformation</li>
+                    <li>Pagination support</li>
+                    <li>Retry with exponential backoff</li>
+                </ul>
+            </div>
+
+            <!-- SOAP API -->
+            <div class="pattern-card" onclick="openPatternConfig('soap-api')">
+                <div class="pattern-icon">🧼</div>
+                <div class="pattern-title">SOAP API</div>
+                <div class="pattern-subtitle">Enterprise Web Services</div>
+                <ul class="pattern-features">
+                    <li>SOAP 1.1 and 1.2 support</li>
+                    <li>WSDL-based code generation</li>
+                    <li>WS-Security integration</li>
+                    <li>MTOM attachments</li>
+                    <li>Legacy system compatibility</li>
+                </ul>
+            </div>
+
+            <!-- Event Stream -->
+            <div class="pattern-card" onclick="openPatternConfig('event-stream')">
+                <div class="pattern-icon">📨</div>
+                <div class="pattern-title">Event Stream (Kafka)</div>
+                <div class="pattern-subtitle">Real-time Event Processing</div>
+                <ul class="pattern-features">
+                    <li>Kafka, Kinesis, Event Hub support</li>
+                    <li>Consumer groups & partitions</li>
+                    <li>CloudEvents format</li>
+                    <li>Stream processing</li>
+                    <li>Exactly-once semantics</li>
+                </ul>
+            </div>
+
+            <!-- Messaging -->
+            <div class="pattern-card" onclick="openPatternConfig('messaging')">
+                <div class="pattern-icon">💬</div>
+                <div class="pattern-title">Message Queue</div>
+                <div class="pattern-subtitle">Asynchronous Messaging</div>
+                <ul class="pattern-features">
+                    <li>RabbitMQ, ActiveMQ, IBM MQ</li>
+                    <li>Point-to-point & pub/sub</li>
+                    <li>Transaction support</li>
+                    <li>Dead letter queues</li>
+                    <li>Message acknowledgment</li>
+                </ul>
+            </div>
+
+            <!-- File Transfer -->
+            <div class="pattern-card" onclick="openPatternConfig('file-transfer')">
+                <div class="pattern-icon">📁</div>
+                <div class="pattern-title">File Transfer</div>
+                <div class="pattern-subtitle">Secure File Exchange</div>
+                <ul class="pattern-features">
+                    <li>FTP, SFTP, FTPS, SCP protocols</li>
+                    <li>Cloud storage (S3, Azure Blob, GCS)</li>
+                    <li>File polling & pattern matching</li>
+                    <li>Compression & encryption</li>
+                    <li>Archiving with retention</li>
+                </ul>
+            </div>
+
+            <!-- Batch Processing -->
+            <div class="pattern-card" onclick="openPatternConfig('batch')">
+                <div class="pattern-icon">⚙️</div>
+                <div class="pattern-title">Batch Processing</div>
+                <div class="pattern-subtitle">High-Volume Data Processing</div>
+                <ul class="pattern-features">
+                    <li>Chunk-based processing</li>
+                    <li>Parallel processing</li>
+                    <li>Checkpointing & restart</li>
+                    <li>Aggregation & windowing</li>
+                    <li>Scheduled execution</li>
+                </ul>
+            </div>
+
+            <!-- Database Sync -->
+            <div class="pattern-card" onclick="openPatternConfig('database-sync')">
+                <div class="pattern-icon">🗄️</div>
+                <div class="pattern-title">Database Sync</div>
+                <div class="pattern-subtitle">Data Replication & CDC</div>
+                <ul class="pattern-features">
+                    <li>Full & incremental sync</li>
+                    <li>Change Data Capture (CDC)</li>
+                    <li>Conflict resolution</li>
+                    <li>Bulk loading optimization</li>
+                    <li>Multi-database support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const patterns = {
+            'rest-api': {
+                title: 'REST API Integration',
+                icon: '🔌',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'method', label: 'HTTP Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], required: true },
+                    { name: 'sourceUrl', label: 'Source URL', type: 'text', required: true },
+                    { name: 'targetUrl', label: 'Target URL', type: 'text', required: true },
+                    { name: 'authType', label: 'Authentication', type: 'select', options: ['None', 'API Key', 'OAuth2', 'JWT', 'Basic'] },
+                    { name: 'timeout', label: 'Timeout (seconds)', type: 'number', default: 30 },
+                    { name: 'retryAttempts', label: 'Retry Attempts', type: 'number', default: 3 },
+                    { name: 'transformation', label: 'Data Transformation', type: 'textarea', help: 'JSONPath mapping expression' }
+                ]
+            },
+            'soap-api': {
+                title: 'SOAP API Integration',
+                icon: '🧼',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'wsdlUrl', label: 'WSDL URL', type: 'text', required: true },
+                    { name: 'operation', label: 'Operation Name', type: 'text', required: true },
+                    { name: 'soapVersion', label: 'SOAP Version', type: 'select', options: ['1.1', '1.2'], default: '1.2' },
+                    { name: 'namespace', label: 'Namespace', type: 'text' },
+                    { name: 'security', label: 'WS-Security', type: 'checkbox' },
+                    { name: 'mtom', label: 'Enable MTOM', type: 'checkbox', help: 'For binary attachments' }
+                ]
+            },
+            'event-stream': {
+                title: 'Event Stream Integration',
+                icon: '📨',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'provider', label: 'Provider', type: 'select', options: ['Kafka', 'AWS Kinesis', 'Azure Event Hub', 'Google Pub/Sub'], required: true },
+                    { name: 'sourceTopic', label: 'Source Topic', type: 'text', required: true },
+                    { name: 'targetTopic', label: 'Target Topic', type: 'text', required: true },
+                    { name: 'consumerGroup', label: 'Consumer Group', type: 'text' },
+                    { name: 'partitions', label: 'Partitions', type: 'number', default: 3 },
+                    { name: 'offsetReset', label: 'Offset Reset', type: 'select', options: ['earliest', 'latest', 'none'] },
+                    { name: 'cloudEvents', label: 'Use CloudEvents Format', type: 'checkbox', default: true }
+                ]
+            },
+            'messaging': {
+                title: 'Message Queue Integration',
+                icon: '💬',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'provider', label: 'MQ Provider', type: 'select', options: ['RabbitMQ', 'ActiveMQ', 'IBM MQ', 'AWS SQS', 'Azure Service Bus'], required: true },
+                    { name: 'queueName', label: 'Queue/Topic Name', type: 'text', required: true },
+                    { name: 'exchangeType', label: 'Exchange Type', type: 'select', options: ['direct', 'topic', 'fanout', 'headers'] },
+                    { name: 'durable', label: 'Durable Queue', type: 'checkbox', default: true },
+                    { name: 'autoAck', label: 'Auto Acknowledge', type: 'checkbox', default: false },
+                    { name: 'dlq', label: 'Enable Dead Letter Queue', type: 'checkbox', default: true }
+                ]
+            },
+            'file-transfer': {
+                title: 'File Transfer Integration',
+                icon: '📁',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'protocol', label: 'Protocol', type: 'select', options: ['SFTP', 'FTP', 'FTPS', 'SCP', 'S3', 'Azure Blob', 'Google Cloud Storage'], required: true },
+                    { name: 'sourceDir', label: 'Source Directory', type: 'text', required: true },
+                    { name: 'targetDir', label: 'Target Directory', type: 'text', required: true },
+                    { name: 'filePattern', label: 'File Pattern', type: 'text', placeholder: '*.csv', help: 'Glob pattern or regex' },
+                    { name: 'pollingInterval', label: 'Polling Interval', type: 'text', placeholder: '5m', help: 'e.g., 5m, 1h, 1d' },
+                    { name: 'compression', label: 'Enable Compression', type: 'checkbox' },
+                    { name: 'encryption', label: 'Enable Encryption', type: 'checkbox' },
+                    { name: 'archive', label: 'Archive After Processing', type: 'checkbox', default: true }
+                ]
+            },
+            'batch': {
+                title: 'Batch Processing Integration',
+                icon: '⚙️',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'schedule', label: 'Cron Schedule', type: 'text', placeholder: '0 2 * * *', help: 'Cron expression' },
+                    { name: 'chunkSize', label: 'Chunk Size', type: 'number', default: 1000, help: 'Records per batch' },
+                    { name: 'parallelism', label: 'Parallelism', type: 'number', default: 4, help: 'Degree of parallel processing' },
+                    { name: 'checkpointing', label: 'Enable Checkpointing', type: 'checkbox', default: true },
+                    { name: 'ordering', label: 'Preserve Order', type: 'checkbox', default: false },
+                    { name: 'aggregation', label: 'Enable Aggregation', type: 'checkbox' },
+                    { name: 'window', label: 'Aggregation Window', type: 'text', placeholder: '5m', help: 'Time window for aggregation' }
+                ]
+            },
+            'database-sync': {
+                title: 'Database Synchronization',
+                icon: '🗄️',
+                fields: [
+                    { name: 'name', label: 'Integration Name', type: 'text', required: true },
+                    { name: 'syncType', label: 'Sync Type', type: 'select', options: ['Full', 'Incremental', 'CDC (Change Data Capture)'], required: true },
+                    { name: 'sourceDB', label: 'Source Database', type: 'text', required: true },
+                    { name: 'targetDB', label: 'Target Database', type: 'text', required: true },
+                    { name: 'table', label: 'Table Name', type: 'text', required: true },
+                    { name: 'keyColumns', label: 'Key Columns', type: 'text', help: 'Comma-separated primary key columns' },
+                    { name: 'incrementalColumn', label: 'Incremental Column', type: 'text', help: 'For incremental sync (timestamp/version)' },
+                    { name: 'conflictResolution', label: 'Conflict Resolution', type: 'select', options: ['source-wins', 'target-wins', 'latest-wins', 'manual'] },
+                    { name: 'bulkLoad', label: 'Enable Bulk Loading', type: 'checkbox', default: true }
+                ]
+            }
+        };
+
+        function openPatternConfig(patternType) {
+            const pattern = patterns[patternType];
+            const modal = document.getElementById('configModal');
+            const modalBody = document.getElementById('modalBody');
+
+            let html = `
+                <h2><span style="font-size: 2rem;">${pattern.icon}</span> ${pattern.title}</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Configure your integration below</p>
+                <form id="patternForm" onsubmit="generateConfig(event, '${patternType}')">
+            `;
+
+            // Group fields into sections
+            const basicFields = pattern.fields.slice(0, Math.ceil(pattern.fields.length / 2));
+            const advancedFields = pattern.fields.slice(Math.ceil(pattern.fields.length / 2));
+
+            html += '<div class="form-section"><h3>Basic Configuration</h3><div class="form-row">';
+
+            basicFields.forEach(field => {
+                html += generateFormField(field);
+            });
+
+            html += '</div></div><div class="form-section"><h3>Advanced Options</h3><div class="form-row">';
+
+            advancedFields.forEach(field => {
+                html += generateFormField(field);
+            });
+
+            html += `
+                </div></div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Configuration</button>
+                </div>
+                </form>
+                <div id="output"></div>
+            `;
+
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function generateFormField(field) {
+            let html = '<div class="form-group">';
+            html += `<label>${field.label}${field.required ? ' <span style="color: var(--danger);">*</span>' : ''}</label>`;
+
+            if (field.type === 'select') {
+                html += `<select name="${field.name}" ${field.required ? 'required' : ''}>`;
+                field.options.forEach(opt => {
+                    html += `<option value="${opt}" ${field.default === opt ? 'selected' : ''}>${opt}</option>`;
+                });
+                html += '</select>';
+            } else if (field.type === 'textarea') {
+                html += `<textarea name="${field.name}" ${field.required ? 'required' : ''} placeholder="${field.placeholder || ''}"></textarea>`;
+            } else if (field.type === 'checkbox') {
+                html += `<div class="checkbox-group">
+                    <input type="checkbox" name="${field.name}" id="${field.name}" ${field.default ? 'checked' : ''}>
+                    <label for="${field.name}" style="margin: 0;">${field.label}</label>
+                </div>`;
+                html = html.replace(`<label>${field.label}`, '<div style="height: 0; overflow: hidden;">'); // Hide duplicate label
+            } else {
+                html += `<input type="${field.type}" name="${field.name}" ${field.required ? 'required' : ''}
+                    placeholder="${field.placeholder || ''}" value="${field.default || ''}">`;
+            }
+
+            if (field.help) {
+                html += `<div class="form-help">${field.help}</div>`;
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function generateConfig(event, patternType) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const config = {};
+
+            for (let [key, value] of formData.entries()) {
+                config[key] = value;
+            }
+
+            // Add checkboxes that are unchecked
+            patterns[patternType].fields.forEach(field => {
+                if (field.type === 'checkbox' && !config[field.name]) {
+                    config[field.name] = false;
+                }
+            });
+
+            const definition = {
+                version: "1.0.0",
+                info: {
+                    title: config.name || "Integration",
+                    version: "1.0.0",
+                    description: `${patterns[patternType].title} integration`
+                },
+                systems: {
+                    source: {
+                        name: "Source System",
+                        type: "application"
+                    },
+                    target: {
+                        name: "Target System",
+                        type: "application"
+                    }
+                },
+                integrations: [{
+                    id: config.name?.toLowerCase().replace(/\s+/g, '-') || "integration-1",
+                    name: config.name || "Integration",
+                    pattern: patternType,
+                    source: { system: "source" },
+                    target: { system: "target" },
+                    config: config
+                }]
+            };
+
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Generated Configuration</h3>
+                <div class="output-panel">
+                    <pre>${JSON.stringify(definition, null, 2)}</pre>
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                    <button class="btn btn-primary" onclick="downloadConfig('${patternType}')">💾 Download JSON</button>
+                    <button class="btn btn-secondary" onclick="copyConfig()">📋 Copy to Clipboard</button>
+                </div>
+            `;
+
+            window.currentConfig = definition;
+        }
+
+        function downloadConfig(patternType) {
+            const json = JSON.stringify(window.currentConfig, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${patternType}-integration.json`;
+            a.click();
+        }
+
+        function copyConfig() {
+            const json = JSON.stringify(window.currentConfig, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                alert('✅ Configuration copied to clipboard!');
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('configModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('configModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

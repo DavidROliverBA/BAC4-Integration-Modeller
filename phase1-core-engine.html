@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC4 Integration Modeller - Phase 1: Core Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-main: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-code: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            margin-left: 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: var(--bg-secondary);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+            background: var(--bg-code);
+            color: #e2e8f0;
+        }
+
+        .output {
+            background: var(--bg-code);
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            min-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        .validation-result {
+            margin-top: 1rem;
+        }
+
+        .error-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .error-item {
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--danger);
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .error-item strong {
+            color: var(--danger);
+        }
+
+        .warning-item {
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--warning);
+            margin-bottom: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .warning-item strong {
+            color: var(--warning);
+        }
+
+        .template-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-card {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            border-color: var(--primary);
+            background: var(--bg-secondary);
+        }
+
+        .template-card.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .template-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .example-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .example-card {
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .example-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .example-header {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .example-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .example-pattern {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 BAC4 Integration Modeller <span class="badge">Phase 1: MVP</span></h1>
+        <p>Core Engine with Validation, Code Generation & CLI Simulator</p>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="validate">✅ Validate</button>
+            <button class="tab" data-tab="generate">⚙️ Generate Code</button>
+            <button class="tab" data-tab="examples">📚 Examples</button>
+            <button class="tab" data-tab="cli">💻 CLI Simulator</button>
+        </div>
+
+        <!-- Validate Tab -->
+        <div id="validate" class="tab-content active">
+            <div class="panel">
+                <h2>Integration Definition Validator</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Paste your integration definition JSON below to validate against the BAC4 schema.
+                </p>
+
+                <div class="editor-container">
+                    <div class="editor-panel">
+                        <h3>Integration Definition (JSON)</h3>
+                        <textarea id="validateInput" placeholder='Paste your integration definition JSON here...'></textarea>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="validateDefinition()">🔍 Validate</button>
+                            <button class="btn btn-secondary" onclick="clearValidation()">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="editor-panel">
+                        <h3>Validation Results</h3>
+                        <div id="validationOutput" class="output">
+Validation results will appear here...
+
+Schema Validation Checks:
+✓ Structural validation (JSON Schema)
+✓ Reference validation (systems, schemas)
+✓ Business rule validation
+✓ Best practice linting
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Code Tab -->
+        <div id="generate" class="tab-content">
+            <div class="panel">
+                <h2>Code Generator</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Generate implementation code from your integration definition.
+                </p>
+
+                <h3 style="margin-bottom: 1rem;">Select Target Platform:</h3>
+                <div class="template-selector">
+                    <div class="template-card selected" data-target="camel">
+                        <div class="template-icon">☕</div>
+                        <div class="template-name">Apache Camel</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Java/Spring Boot</div>
+                    </div>
+                    <div class="template-card" data-target="spring">
+                        <div class="template-icon">🍃</div>
+                        <div class="template-name">Spring Integration</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Java</div>
+                    </div>
+                    <div class="template-card" data-target="nodejs">
+                        <div class="template-icon">🟢</div>
+                        <div class="template-name">Node.js</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Express/NestJS</div>
+                    </div>
+                    <div class="template-card" data-target="python">
+                        <div class="template-icon">🐍</div>
+                        <div class="template-name">Python</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">FastAPI</div>
+                    </div>
+                </div>
+
+                <div class="editor-container">
+                    <div class="editor-panel">
+                        <h3>Integration Definition (JSON)</h3>
+                        <textarea id="generateInput" placeholder='Paste your integration definition JSON here...'></textarea>
+                        <div class="button-group">
+                            <button class="btn btn-success" onclick="generateCode()">⚙️ Generate Code</button>
+                            <button class="btn btn-secondary" onclick="clearGenerate()">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="editor-panel">
+                        <h3>Generated Code</h3>
+                        <div id="generateOutput" class="output">
+Generated code will appear here...
+
+Supported targets:
+• Apache Camel (Java/Spring Boot)
+• Spring Integration (Java)
+• Node.js (Express/NestJS)
+• Python (FastAPI/Flask)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examples Tab -->
+        <div id="examples" class="tab-content">
+            <div class="panel">
+                <h2>Example Integration Definitions</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Click an example to load it into the validator or generator.
+                </p>
+
+                <div class="example-gallery">
+                    <div class="example-card" onclick="loadExample('rest')">
+                        <div class="example-header">
+                            <div class="example-title">CRM to ERP Customer Sync</div>
+                            <div class="example-description">Synchronize customer data from Salesforce to SAP ERP</div>
+                            <div class="example-pattern">REST API</div>
+                        </div>
+                    </div>
+
+                    <div class="example-card" onclick="loadExample('kafka')">
+                        <div class="example-header">
+                            <div class="example-title">Order Event Processing</div>
+                            <div class="example-description">Real-time order events via Kafka streams</div>
+                            <div class="example-pattern">Event Stream</div>
+                        </div>
+                    </div>
+
+                    <div class="example-card" onclick="loadExample('file')">
+                        <div class="example-header">
+                            <div class="example-title">Daily Sales Report</div>
+                            <div class="example-description">SFTP file transfer with batch processing</div>
+                            <div class="example-pattern">File Transfer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CLI Simulator Tab -->
+        <div id="cli" class="tab-content">
+            <div class="panel">
+                <h2>CLI Simulator</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Simulate the BAC4 command-line interface.
+                </p>
+
+                <div style="background: var(--bg-code); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+                    <div style="color: #10b981; margin-bottom: 0.5rem;">$ bac4 --help</div>
+                    <div style="color: #e2e8f0; font-family: monospace; font-size: 0.875rem;">
+<span style="color: #60a5fa;">Usage:</span> bac4 [command] [options]
+
+<span style="color: #60a5fa;">Commands:</span>
+  init &lt;name&gt;           Initialize a new integration definition
+  validate &lt;file&gt;       Validate an integration definition
+  generate &lt;file&gt;       Generate code from definition
+  docs &lt;file&gt;           Generate documentation
+  catalog list          List all integrations
+  catalog search        Search integrations
+
+<span style="color: #60a5fa;">Options:</span>
+  -h, --help           Show help
+  -v, --version        Show version
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="runCLI('validate')">bac4 validate integration.json</button>
+                    <button class="btn btn-primary" onclick="runCLI('generate')">bac4 generate --target camel</button>
+                    <button class="btn btn-primary" onclick="runCLI('docs')">bac4 docs --format html</button>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h3>Output:</h3>
+                    <div id="cliOutput" class="output">
+CLI output will appear here...
+
+Try running a command above!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Example definitions
+        const examples = {
+            rest: {
+                "version": "1.0.0",
+                "info": {
+                    "title": "Customer Data Integration",
+                    "version": "1.0.0",
+                    "description": "REST API integration between CRM and ERP systems"
+                },
+                "systems": {
+                    "salesforce-crm": {
+                        "name": "Salesforce CRM",
+                        "type": "external"
+                    },
+                    "sap-erp": {
+                        "name": "SAP ERP",
+                        "type": "application"
+                    }
+                },
+                "integrations": [{
+                    "id": "crm-to-erp-customer-sync",
+                    "name": "Customer Sync",
+                    "pattern": "rest-api",
+                    "source": {
+                        "system": "salesforce-crm",
+                        "protocol": "https",
+                        "format": "json"
+                    },
+                    "target": {
+                        "system": "sap-erp",
+                        "protocol": "https",
+                        "format": "json"
+                    },
+                    "trigger": {
+                        "type": "webhook"
+                    },
+                    "config": {
+                        "method": "POST",
+                        "path": "/customers"
+                    }
+                }]
+            },
+            kafka: {
+                "version": "1.0.0",
+                "info": {
+                    "title": "Order Event Processing",
+                    "version": "1.0.0"
+                },
+                "systems": {
+                    "ecommerce": {
+                        "name": "E-Commerce Platform",
+                        "type": "application"
+                    },
+                    "fulfillment": {
+                        "name": "Fulfillment System",
+                        "type": "application"
+                    }
+                },
+                "integrations": [{
+                    "id": "order-events",
+                    "name": "Order Event Stream",
+                    "pattern": "event-stream",
+                    "source": {
+                        "system": "ecommerce",
+                        "protocol": "kafka",
+                        "connection": { "topic": "orders.events" }
+                    },
+                    "target": {
+                        "system": "fulfillment",
+                        "protocol": "kafka",
+                        "connection": { "topic": "fulfillment.orders" }
+                    },
+                    "config": {
+                        "provider": "kafka",
+                        "consumerGroup": "fulfillment-processor",
+                        "cloudEvents": true
+                    }
+                }]
+            },
+            file: {
+                "version": "1.0.0",
+                "info": {
+                    "title": "Daily Sales Report",
+                    "version": "1.0.0"
+                },
+                "systems": {
+                    "sftp": {
+                        "name": "SFTP Server",
+                        "type": "service"
+                    },
+                    "warehouse": {
+                        "name": "Data Warehouse",
+                        "type": "database"
+                    }
+                },
+                "integrations": [{
+                    "id": "sales-file-transfer",
+                    "name": "Sales File Transfer",
+                    "pattern": "file-transfer",
+                    "source": {
+                        "system": "sftp",
+                        "protocol": "sftp",
+                        "format": "csv"
+                    },
+                    "target": {
+                        "system": "warehouse",
+                        "protocol": "jdbc"
+                    },
+                    "config": {
+                        "filePattern": "sales_*.csv",
+                        "polling": { "enabled": true, "interval": "5m" }
+                    }
+                }]
+            }
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // Template selection
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Validation function
+        function validateDefinition() {
+            const input = document.getElementById('validateInput').value;
+            const output = document.getElementById('validationOutput');
+
+            if (!input.trim()) {
+                output.innerHTML = '<div class="alert alert-warning">⚠️ Please provide an integration definition to validate.</div>';
+                return;
+            }
+
+            try {
+                const definition = JSON.parse(input);
+                const errors = [];
+                const warnings = [];
+
+                // Structural validation
+                if (!definition.version) errors.push({ path: 'version', message: 'Missing required field: version' });
+                if (!definition.info) errors.push({ path: 'info', message: 'Missing required field: info' });
+                if (!definition.integrations) errors.push({ path: 'integrations', message: 'Missing required field: integrations' });
+
+                if (definition.info) {
+                    if (!definition.info.title) errors.push({ path: 'info.title', message: 'Missing required field: info.title' });
+                    if (!definition.info.version) errors.push({ path: 'info.version', message: 'Missing required field: info.version' });
+                }
+
+                // Reference validation
+                if (definition.integrations && definition.systems) {
+                    definition.integrations.forEach((integration, idx) => {
+                        if (integration.source && integration.source.system && !definition.systems[integration.source.system]) {
+                            errors.push({ path: `integrations[${idx}].source.system`, message: `System "${integration.source.system}" not found` });
+                        }
+                        if (integration.target && integration.target.system && !definition.systems[integration.target.system]) {
+                            errors.push({ path: `integrations[${idx}].target.system`, message: `System "${integration.target.system}" not found` });
+                        }
+
+                        // Best practices
+                        if (!integration.description) {
+                            warnings.push({ path: `integrations[${idx}].description`, message: 'Integration should have a description' });
+                        }
+                    });
+                }
+
+                // Display results
+                let html = '';
+
+                if (errors.length === 0) {
+                    html = '<div class="alert alert-success">✅ Validation Passed!\n\nYour integration definition is valid and ready to use.</div>';
+                } else {
+                    html = '<div class="alert alert-error">❌ Validation Failed\n\nFound ' + errors.length + ' error(s)</div>';
+                    html += '<ul class="error-list">';
+                    errors.forEach(err => {
+                        html += `<li class="error-item"><strong>${err.path}:</strong> ${err.message}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                if (warnings.length > 0) {
+                    html += '<div class="alert alert-warning" style="margin-top: 1rem;">⚠️ ' + warnings.length + ' Warning(s)</div>';
+                    html += '<ul class="error-list">';
+                    warnings.forEach(warn => {
+                        html += `<li class="warning-item"><strong>${warn.path}:</strong> ${warn.message}</li>`;
+                    });
+                    html += '</ul>';
+                }
+
+                output.innerHTML = html;
+
+            } catch (e) {
+                output.innerHTML = '<div class="alert alert-error">❌ Invalid JSON\n\n' + e.message + '</div>';
+            }
+        }
+
+        function clearValidation() {
+            document.getElementById('validateInput').value = '';
+            document.getElementById('validationOutput').innerHTML = 'Validation results will appear here...';
+        }
+
+        // Code generation function
+        function generateCode() {
+            const input = document.getElementById('generateInput').value;
+            const output = document.getElementById('generateOutput');
+            const selectedTarget = document.querySelector('.template-card.selected').dataset.target;
+
+            if (!input.trim()) {
+                output.innerHTML = '<div class="alert alert-warning">⚠️ Please provide an integration definition.</div>';
+                return;
+            }
+
+            try {
+                const definition = JSON.parse(input);
+                const integration = definition.integrations?.[0];
+
+                if (!integration) {
+                    output.innerHTML = '<div class="alert alert-error">❌ No integrations found in definition</div>';
+                    return;
+                }
+
+                let code = '';
+
+                if (selectedTarget === 'camel') {
+                    code = `package com.example.routes;
+
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
+
+/**
+ * ${integration.name || 'Integration Route'}
+ * Generated from BAC4 Integration Modeller
+ */
+@Component
+public class ${toPascalCase(integration.id)}Route extends RouteBuilder {
+
+    @Override
+    public void configure() throws Exception {
+        ${generateCamelRoute(integration)}
+    }
+}`;
+                } else if (selectedTarget === 'spring') {
+                    code = `package com.example.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.dsl.IntegrationFlow;
+
+/**
+ * ${integration.name || 'Integration Configuration'}
+ * Generated from BAC4 Integration Modeller
+ */
+@Configuration
+public class ${toPascalCase(integration.id)}Config {
+
+    @Bean
+    public IntegrationFlow ${toCamelCase(integration.id)}Flow() {
+        return IntegrationFlows
+            ${generateSpringFlow(integration)}
+            .get();
+    }
+}`;
+                } else if (selectedTarget === 'nodejs') {
+                    code = `// ${integration.name || 'Integration Route'}
+// Generated from BAC4 Integration Modeller
+
+import { Router } from 'express';
+import axios from 'axios';
+
+const router = Router();
+
+${generateNodeJsRoute(integration)}
+
+export default router;`;
+                } else if (selectedTarget === 'python') {
+                    code = `# ${integration.name || 'Integration Route'}
+# Generated from BAC4 Integration Modeller
+
+from fastapi import APIRouter, HTTPException
+import httpx
+
+router = APIRouter()
+
+${generatePythonRoute(integration)}`;
+                }
+
+                output.innerHTML = '<div class="alert alert-success">✅ Code Generated Successfully!</div>\n' + code;
+
+            } catch (e) {
+                output.innerHTML = '<div class="alert alert-error">❌ Generation Error\n\n' + e.message + '</div>';
+            }
+        }
+
+        function generateCamelRoute(integration) {
+            const pattern = integration.pattern;
+
+            if (pattern === 'rest-api') {
+                return `from("direct:${integration.id}")
+            .to("${integration.target.protocol}://${integration.target.connection?.url || 'target-url'}")
+            .log("Request processed: \${body}");`;
+            } else if (pattern === 'event-stream') {
+                return `from("kafka:${integration.source.connection?.topic || 'source-topic'}")
+            .log("Received event: \${body}")
+            .to("kafka:${integration.target.connection?.topic || 'target-topic'}");`;
+            } else {
+                return `from("direct:${integration.id}")
+            .log("Processing integration: ${integration.name}");`;
+            }
+        }
+
+        function generateSpringFlow(integration) {
+            return `.from("http.inbound.gateway")
+            .transform(message -> transformData(message))
+            .channel("output.channel")`;
+        }
+
+        function generateNodeJsRoute(integration) {
+            const method = integration.config?.method?.toLowerCase() || 'post';
+            const path = integration.config?.path || '/integration';
+
+            return `router.${method}('${path}', async (req, res) => {
+  try {
+    const response = await axios.${method}(
+      'target-url',
+      req.body
+    );
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});`;
+        }
+
+        function generatePythonRoute(integration) {
+            const method = integration.config?.method?.toLowerCase() || 'post';
+
+            return `@router.${method}("/integration")
+async def process_integration(data: dict):
+    async with httpx.AsyncClient() as client:
+        response = await client.${method}("target-url", json=data)
+        return response.json()`;
+        }
+
+        function clearGenerate() {
+            document.getElementById('generateInput').value = '';
+            document.getElementById('generateOutput').innerHTML = 'Generated code will appear here...';
+        }
+
+        // Load example
+        function loadExample(type) {
+            const example = JSON.stringify(examples[type], null, 2);
+            document.getElementById('validateInput').value = example;
+            document.getElementById('generateInput').value = example;
+
+            // Switch to validate tab
+            document.querySelector('.tab[data-tab="validate"]').click();
+
+            // Auto-validate
+            setTimeout(() => validateDefinition(), 100);
+        }
+
+        // CLI simulation
+        function runCLI(command) {
+            const output = document.getElementById('cliOutput');
+
+            if (command === 'validate') {
+                output.innerHTML = `$ bac4 validate integration.json
+
+<span style="color: #60a5fa;">Validating integration definition...</span>
+
+✓ JSON Schema validation passed
+✓ Reference validation passed
+✓ Business rules validated
+✓ Best practices checked
+
+<span style="color: #10b981;">✅ Validation successful!</span>
+
+Summary:
+  - Integrations: 1
+  - Systems: 2
+  - Patterns: rest-api
+  - Warnings: 0`;
+            } else if (command === 'generate') {
+                output.innerHTML = `$ bac4 generate integration.json --target camel --output ./generated
+
+<span style="color: #60a5fa;">Generating code for target: Apache Camel</span>
+
+✓ Parsing integration definition
+✓ Loading templates
+✓ Generating route builders
+✓ Generating configuration
+✓ Generating tests
+
+<span style="color: #10b981;">✅ Code generation complete!</span>
+
+Generated files:
+  ./generated/src/main/java/routes/CustomerSyncRoute.java
+  ./generated/src/main/resources/application.properties
+  ./generated/pom.xml
+
+Total: 3 files generated`;
+            } else if (command === 'docs') {
+                output.innerHTML = `$ bac4 docs integration.json --format html --output ./docs
+
+<span style="color: #60a5fa;">Generating documentation...</span>
+
+✓ Parsing integration definition
+✓ Generating markdown
+✓ Converting to HTML
+✓ Creating diagrams
+✓ Adding styling
+
+<span style="color: #10b981;">✅ Documentation generated!</span>
+
+Output:
+  ./docs/integration-documentation.html
+
+Open in browser: file://./docs/integration-documentation.html`;
+            }
+        }
+
+        // Utility functions
+        function toCamelCase(str) {
+            return str.replace(/-./g, x => x[1].toUpperCase());
+        }
+
+        function toPascalCase(str) {
+            const camel = toCamelCase(str);
+            return camel.charAt(0).toUpperCase() + camel.slice(1);
+        }
+
+        // Load default example on page load
+        window.addEventListener('load', () => {
+            loadExample('rest');
+        });
+    </script>
+</body>
+</html>
