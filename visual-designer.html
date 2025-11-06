@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAC4 Integration Modeller - Visual Designer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            --bg-main: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-dark: #1e293b;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--purple);
+        }
+
+        .btn-primary:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            height: calc(100vh - 80px);
+            gap: 0;
+        }
+
+        /* Left Panel - Component Palette */
+        .palette {
+            background: white;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .palette h3 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .palette-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .palette-item:hover {
+            border-color: var(--purple);
+            transform: translateX(4px);
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+        }
+
+        .palette-item:active {
+            cursor: grabbing;
+        }
+
+        .palette-icon {
+            font-size: 1.75rem;
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .palette-label {
+            flex: 1;
+        }
+
+        .palette-label-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .palette-label-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Canvas */
+        .canvas {
+            background:
+                radial-gradient(circle, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .canvas-inner {
+            min-width: 2000px;
+            min-height: 2000px;
+            position: relative;
+        }
+
+        /* System Node */
+        .system-node {
+            position: absolute;
+            background: white;
+            border: 3px solid var(--primary);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            min-width: 180px;
+            cursor: move;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .system-node:hover {
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+            transform: scale(1.02);
+        }
+
+        .system-node.selected {
+            border-color: var(--purple);
+            border-width: 4px;
+            box-shadow: 0 8px 16px rgba(139, 92, 246, 0.4);
+        }
+
+        .node-icon {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .node-title {
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .node-subtitle {
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Integration Node */
+        .integration-node {
+            position: absolute;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: 3px solid #6d28d9;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            min-width: 200px;
+            cursor: move;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        }
+
+        .integration-node:hover {
+            box-shadow: 0 8px 16px rgba(139, 92, 246, 0.5);
+            transform: scale(1.02);
+        }
+
+        .integration-node.selected {
+            border-color: #fbbf24;
+            border-width: 4px;
+        }
+
+        .integration-icon {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .integration-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .integration-pattern {
+            font-size: 0.7rem;
+            text-align: center;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Connection Lines */
+        .connection-line {
+            stroke: var(--purple);
+            stroke-width: 3;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .connection-label {
+            fill: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Right Panel - Properties */
+        .properties-panel {
+            background: white;
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .properties-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .properties-header h3 {
+            font-size: 1.125rem;
+            color: var(--text-primary);
+        }
+
+        .form-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-section-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.375rem;
+            color: var(--text-primary);
+        }
+
+        .form-group label .required {
+            color: var(--danger);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .form-help {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .template-card {
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-card:hover {
+            border-color: var(--purple);
+            background: var(--bg-secondary);
+        }
+
+        .template-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .template-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border-color: var(--primary);
+            color: #1e40af;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .palette, .properties-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🎨 BAC4 Integration Modeller</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="openTemplates()">📑 Templates</button>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📁 Load JSON</button>
+            <button class="btn btn-success" onclick="exportJSON()">💾 Export JSON</button>
+            <button class="btn btn-secondary" onclick="clearAll()">🗑️ Clear</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Panel: Component Palette -->
+        <div class="palette">
+            <div class="section">
+                <h3>📋 Quick Actions</h3>
+                <div class="quick-actions">
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="newIntegration()">+ New Integration</button>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="validateDesign()">✅ Validate</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🖥️ Systems</h3>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="application">
+                    <span class="palette-icon">💼</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Application</div>
+                        <div class="palette-label-desc">Business app</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="database">
+                    <span class="palette-icon">🗄️</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Database</div>
+                        <div class="palette-label-desc">Data storage</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="service">
+                    <span class="palette-icon">☁️</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Service</div>
+                        <div class="palette-label-desc">Cloud service</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="external">
+                    <span class="palette-icon">🌐</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">External</div>
+                        <div class="palette-label-desc">3rd party</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>🔌 Integration Patterns</h3>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="rest-api">
+                    <span class="palette-icon">🔌</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">REST API</div>
+                        <div class="palette-label-desc">HTTP/HTTPS</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="event-stream">
+                    <span class="palette-icon">📨</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Event Stream</div>
+                        <div class="palette-label-desc">Kafka, Kinesis</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="file-transfer">
+                    <span class="palette-icon">📁</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">File Transfer</div>
+                        <div class="palette-label-desc">FTP, SFTP</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="messaging">
+                    <span class="palette-icon">💬</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Messaging</div>
+                        <div class="palette-label-desc">Queue, MQ</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="batch">
+                    <span class="palette-icon">📦</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Batch</div>
+                        <div class="palette-label-desc">Scheduled</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>📚 Load Examples</h3>
+                <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="loadExample('rest-api')">REST API Example</button>
+                <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.5rem;" onclick="loadExample('kafka')">Kafka Example</button>
+                <button class="btn btn-secondary" style="width: 100%;" onclick="loadExample('file-transfer')">File Transfer Example</button>
+            </div>
+        </div>
+
+        <!-- Center: Canvas -->
+        <div class="canvas" id="canvas" ondrop="handleDrop(event)" ondragover="allowDrop(event)">
+            <svg id="connectionsSvg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#8b5cf6" />
+                    </marker>
+                </defs>
+            </svg>
+            <div class="canvas-inner" id="canvasInner">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎨</div>
+                    <h3>Start Building Your Integration</h3>
+                    <p>Drag systems and integration patterns from the left panel</p>
+                    <p style="margin-top: 0.5rem;">Or load an existing JSON file or template</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Properties -->
+        <div class="properties-panel" id="propertiesPanel">
+            <div class="empty-state">
+                <div class="empty-state-icon">⚙️</div>
+                <h3>Properties</h3>
+                <p>Select a component to edit its properties</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Modal -->
+    <div class="modal" id="templateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📑 Integration Templates</h2>
+                <button class="close-btn" onclick="closeModal('templateModal')">×</button>
+            </div>
+            <div class="template-grid">
+                <div class="template-card" onclick="loadTemplate('rest-api')">
+                    <div class="template-title">🔌 REST API Integration</div>
+                    <div class="template-desc">Synchronous request-response pattern for real-time data exchange</div>
+                </div>
+                <div class="template-card" onclick="loadTemplate('event-stream')">
+                    <div class="template-title">📨 Event Streaming</div>
+                    <div class="template-desc">Kafka-based event streaming for real-time data pipelines</div>
+                </div>
+                <div class="template-card" onclick="loadTemplate('file-transfer')">
+                    <div class="template-title">📁 File Transfer</div>
+                    <div class="template-desc">Batch file transfer with SFTP for scheduled data exchange</div>
+                </div>
+                <div class="template-card" onclick="loadTemplate('messaging')">
+                    <div class="template-title">💬 Message Queue</div>
+                    <div class="template-desc">Asynchronous messaging with queues for reliable delivery</div>
+                </div>
+                <div class="template-card" onclick="loadTemplate('database-sync')">
+                    <div class="template-title">🗄️ Database Sync</div>
+                    <div class="template-desc">Change data capture for database synchronization</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" accept=".json" onchange="loadJSONFile(event)">
+
+    <script>
+        // Global state
+        let integrationData = {
+            version: "1.0.0",
+            info: {
+                title: "New Integration",
+                version: "1.0.0",
+                description: "",
+                tags: []
+            },
+            systems: {},
+            integrations: [],
+            components: {
+                schemas: {},
+                securitySchemes: {}
+            }
+        };
+
+        let canvasNodes = [];
+        let selectedNode = null;
+        let draggedPaletteItem = null;
+
+        // Icon mapping
+        const SYSTEM_ICONS = {
+            application: '💼',
+            database: '🗄️',
+            service: '☁️',
+            external: '🌐',
+            legacy: '🖥️'
+        };
+
+        const PATTERN_ICONS = {
+            'rest-api': '🔌',
+            'event-stream': '📨',
+            'file-transfer': '📁',
+            'messaging': '💬',
+            'batch': '📦',
+            'database-sync': '🔄',
+            'soap-api': '🧼'
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+        });
+
+        // Drag and Drop Setup
+        function setupDragAndDrop() {
+            document.querySelectorAll('.palette-item').forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedPaletteItem = {
+                        type: this.dataset.type,
+                        subtype: this.dataset.subtype,
+                        pattern: this.dataset.pattern
+                    };
+                });
+            });
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (!draggedPaletteItem) return;
+
+            const canvas = document.getElementById('canvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left + canvas.scrollLeft;
+            const y = e.clientY - rect.top + canvas.scrollTop;
+
+            if (draggedPaletteItem.type === 'system') {
+                createSystemNode(x, y, draggedPaletteItem.subtype);
+            } else if (draggedPaletteItem.type === 'integration') {
+                createIntegrationNode(x, y, draggedPaletteItem.pattern);
+            }
+
+            draggedPaletteItem = null;
+        }
+
+        // Create System Node
+        function createSystemNode(x, y, subtype) {
+            const systemId = 'system-' + Date.now();
+            const systemData = {
+                name: subtype.charAt(0).toUpperCase() + subtype.slice(1) + ' System',
+                type: subtype,
+                description: '',
+                owner: '',
+                environment: 'development'
+            };
+
+            integrationData.systems[systemId] = systemData;
+
+            const node = {
+                id: systemId,
+                type: 'system',
+                subtype: subtype,
+                data: systemData,
+                x: x,
+                y: y
+            };
+
+            canvasNodes.push(node);
+            renderCanvas();
+            clearEmptyState();
+        }
+
+        // Create Integration Node
+        function createIntegrationNode(x, y, pattern) {
+            const integrationId = 'integration-' + Date.now();
+            const integrationDef = {
+                id: integrationId,
+                name: pattern.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                description: '',
+                pattern: pattern,
+                source: {
+                    system: '',
+                    protocol: '',
+                    format: 'json'
+                },
+                target: {
+                    system: '',
+                    protocol: '',
+                    format: 'json'
+                },
+                trigger: {
+                    type: 'schedule'
+                },
+                transformation: {
+                    type: 'mapping',
+                    mapping: {}
+                },
+                errorHandling: {
+                    retry: {
+                        maxAttempts: 3,
+                        backoff: 'exponential',
+                        delay: '2s'
+                    }
+                },
+                metadata: {
+                    owner: '',
+                    tags: []
+                },
+                config: {}
+            };
+
+            integrationData.integrations.push(integrationDef);
+
+            const node = {
+                id: integrationId,
+                type: 'integration',
+                pattern: pattern,
+                data: integrationDef,
+                x: x,
+                y: y
+            };
+
+            canvasNodes.push(node);
+            renderCanvas();
+            clearEmptyState();
+        }
+
+        // Render Canvas
+        function renderCanvas() {
+            const canvasInner = document.getElementById('canvasInner');
+
+            // Clear existing nodes (but keep empty state if no nodes)
+            canvasInner.querySelectorAll('.system-node, .integration-node').forEach(n => n.remove());
+
+            // Render all nodes
+            canvasNodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = node.type === 'system' ? 'system-node' : 'integration-node';
+                nodeEl.style.left = node.x + 'px';
+                nodeEl.style.top = node.y + 'px';
+                nodeEl.dataset.nodeId = node.id;
+
+                if (node.type === 'system') {
+                    const icon = SYSTEM_ICONS[node.subtype] || '🖥️';
+                    nodeEl.innerHTML = `
+                        <div class="node-icon">${icon}</div>
+                        <div class="node-title">${node.data.name}</div>
+                        <div class="node-subtitle">${node.subtype}</div>
+                    `;
+                } else {
+                    const icon = PATTERN_ICONS[node.pattern] || '🔌';
+                    nodeEl.innerHTML = `
+                        <div class="integration-icon">${icon}</div>
+                        <div class="integration-title">${node.data.name}</div>
+                        <div class="integration-pattern">${node.pattern}</div>
+                    `;
+                }
+
+                nodeEl.onclick = (e) => {
+                    e.stopPropagation();
+                    selectNode(node);
+                };
+
+                let isDragging = false;
+                let startX, startY, initialX, initialY;
+
+                nodeEl.onmousedown = (e) => {
+                    isDragging = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    initialX = node.x;
+                    initialY = node.y;
+                    e.preventDefault();
+                };
+
+                document.onmousemove = (e) => {
+                    if (isDragging && selectedNode && selectedNode.id === node.id) {
+                        const dx = e.clientX - startX;
+                        const dy = e.clientY - startY;
+                        node.x = initialX + dx;
+                        node.y = initialY + dy;
+                        nodeEl.style.left = node.x + 'px';
+                        nodeEl.style.top = node.y + 'px';
+                        renderConnections();
+                    }
+                };
+
+                document.onmouseup = () => {
+                    isDragging = false;
+                };
+
+                canvasInner.appendChild(nodeEl);
+            });
+
+            renderConnections();
+        }
+
+        // Render Connections
+        function renderConnections() {
+            const svg = document.getElementById('connectionsSvg');
+            // Clear existing connections
+            svg.querySelectorAll('line, text').forEach(el => el.remove());
+
+            // Draw connections from integrations to their source and target systems
+            canvasNodes.filter(n => n.type === 'integration').forEach(integration => {
+                const sourceSystemId = integration.data.source?.system;
+                const targetSystemId = integration.data.target?.system;
+
+                const sourceNode = canvasNodes.find(n => n.id === sourceSystemId);
+                const targetNode = canvasNodes.find(n => n.id === targetSystemId);
+
+                if (sourceNode) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('class', 'connection-line');
+                    line.setAttribute('x1', sourceNode.x + 90);
+                    line.setAttribute('y1', sourceNode.y + 60);
+                    line.setAttribute('x2', integration.x + 100);
+                    line.setAttribute('y2', integration.y + 50);
+                    svg.appendChild(line);
+                }
+
+                if (targetNode) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('class', 'connection-line');
+                    line.setAttribute('x1', integration.x + 100);
+                    line.setAttribute('y1', integration.y + 50);
+                    line.setAttribute('x2', targetNode.x + 90);
+                    line.setAttribute('y2', targetNode.y + 60);
+                    svg.appendChild(line);
+                }
+            });
+        }
+
+        // Select Node
+        function selectNode(node) {
+            selectedNode = node;
+
+            // Update visual selection
+            document.querySelectorAll('.system-node, .integration-node').forEach(n => {
+                n.classList.remove('selected');
+            });
+            document.querySelector(`[data-node-id="${node.id}"]`)?.classList.add('selected');
+
+            // Show properties
+            showProperties(node);
+        }
+
+        // Show Properties Panel
+        function showProperties(node) {
+            const panel = document.getElementById('propertiesPanel');
+
+            if (node.type === 'system') {
+                panel.innerHTML = `
+                    <div class="properties-header">
+                        <h3>System Properties</h3>
+                        <button class="btn btn-danger" onclick="deleteNode('${node.id}')">🗑️ Delete</button>
+                    </div>
+                    <div class="form-section">
+                        <div class="form-section-title">Basic Information</div>
+                        <div class="form-group">
+                            <label>Name <span class="required">*</span></label>
+                            <input type="text" value="${node.data.name}" onchange="updateNodeData('${node.id}', 'name', this.value)">
+                            <div class="form-help">Display name for this system</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Type <span class="required">*</span></label>
+                            <select onchange="updateNodeData('${node.id}', 'type', this.value)" value="${node.data.type}">
+                                <option value="application" ${node.data.type === 'application' ? 'selected' : ''}>Application</option>
+                                <option value="database" ${node.data.type === 'database' ? 'selected' : ''}>Database</option>
+                                <option value="service" ${node.data.type === 'service' ? 'selected' : ''}>Service</option>
+                                <option value="external" ${node.data.type === 'external' ? 'selected' : ''}>External</option>
+                                <option value="legacy" ${node.data.type === 'legacy' ? 'selected' : ''}>Legacy</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea onchange="updateNodeData('${node.id}', 'description', this.value)">${node.data.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Version</label>
+                            <input type="text" value="${node.data.version || ''}" onchange="updateNodeData('${node.id}', 'version', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Owner</label>
+                            <input type="text" value="${node.data.owner || ''}" onchange="updateNodeData('${node.id}', 'owner', this.value)">
+                            <div class="form-help">Team or person responsible</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Environment</label>
+                            <select onchange="updateNodeData('${node.id}', 'environment', this.value)">
+                                <option value="development" ${node.data.environment === 'development' ? 'selected' : ''}>Development</option>
+                                <option value="test" ${node.data.environment === 'test' ? 'selected' : ''}>Test</option>
+                                <option value="staging" ${node.data.environment === 'staging' ? 'selected' : ''}>Staging</option>
+                                <option value="production" ${node.data.environment === 'production' ? 'selected' : ''}>Production</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (node.type === 'integration') {
+                const systemOptions = Object.keys(integrationData.systems).map(sysId =>
+                    `<option value="${sysId}">${integrationData.systems[sysId].name}</option>`
+                ).join('');
+
+                panel.innerHTML = `
+                    <div class="properties-header">
+                        <h3>Integration Properties</h3>
+                        <button class="btn btn-danger" onclick="deleteNode('${node.id}')">🗑️ Delete</button>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Basic Information</div>
+                        <div class="form-group">
+                            <label>Name <span class="required">*</span></label>
+                            <input type="text" value="${node.data.name}" onchange="updateIntegrationData('${node.id}', 'name', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea onchange="updateIntegrationData('${node.id}', 'description', this.value)">${node.data.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Pattern <span class="required">*</span></label>
+                            <select onchange="updateIntegrationData('${node.id}', 'pattern', this.value)" disabled>
+                                <option value="${node.data.pattern}">${node.data.pattern}</option>
+                            </select>
+                            <div class="form-help">Pattern cannot be changed after creation</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Source Configuration</div>
+                        <div class="form-group">
+                            <label>Source System <span class="required">*</span></label>
+                            <select onchange="updateIntegrationEndpoint('${node.id}', 'source', 'system', this.value)">
+                                <option value="">Select system...</option>
+                                ${systemOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Protocol</label>
+                            <input type="text" value="${node.data.source.protocol || ''}" onchange="updateIntegrationEndpoint('${node.id}', 'source', 'protocol', this.value)">
+                            <div class="form-help">e.g., https, kafka, sftp</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Format</label>
+                            <select onchange="updateIntegrationEndpoint('${node.id}', 'source', 'format', this.value)">
+                                <option value="json" ${node.data.source.format === 'json' ? 'selected' : ''}>JSON</option>
+                                <option value="xml" ${node.data.source.format === 'xml' ? 'selected' : ''}>XML</option>
+                                <option value="csv" ${node.data.source.format === 'csv' ? 'selected' : ''}>CSV</option>
+                                <option value="avro" ${node.data.source.format === 'avro' ? 'selected' : ''}>Avro</option>
+                                <option value="protobuf" ${node.data.source.format === 'protobuf' ? 'selected' : ''}>Protocol Buffers</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Target Configuration</div>
+                        <div class="form-group">
+                            <label>Target System <span class="required">*</span></label>
+                            <select onchange="updateIntegrationEndpoint('${node.id}', 'target', 'system', this.value)">
+                                <option value="">Select system...</option>
+                                ${systemOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Protocol</label>
+                            <input type="text" value="${node.data.target.protocol || ''}" onchange="updateIntegrationEndpoint('${node.id}', 'target', 'protocol', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Format</label>
+                            <select onchange="updateIntegrationEndpoint('${node.id}', 'target', 'format', this.value)">
+                                <option value="json" ${node.data.target.format === 'json' ? 'selected' : ''}>JSON</option>
+                                <option value="xml" ${node.data.target.format === 'xml' ? 'selected' : ''}>XML</option>
+                                <option value="csv" ${node.data.target.format === 'csv' ? 'selected' : ''}>CSV</option>
+                                <option value="avro" ${node.data.target.format === 'avro' ? 'selected' : ''}>Avro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Trigger Configuration</div>
+                        <div class="form-group">
+                            <label>Trigger Type</label>
+                            <select onchange="updateIntegrationTrigger('${node.id}', 'type', this.value)">
+                                <option value="schedule" ${node.data.trigger.type === 'schedule' ? 'selected' : ''}>Schedule</option>
+                                <option value="event" ${node.data.trigger.type === 'event' ? 'selected' : ''}>Event</option>
+                                <option value="api-call" ${node.data.trigger.type === 'api-call' ? 'selected' : ''}>API Call</option>
+                                <option value="webhook" ${node.data.trigger.type === 'webhook' ? 'selected' : ''}>Webhook</option>
+                                <option value="file-arrival" ${node.data.trigger.type === 'file-arrival' ? 'selected' : ''}>File Arrival</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Metadata</div>
+                        <div class="form-group">
+                            <label>Owner</label>
+                            <input type="text" value="${node.data.metadata.owner || ''}" onchange="updateIntegrationMetadata('${node.id}', 'owner', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>Tags</label>
+                            <input type="text" value="${(node.data.metadata.tags || []).join(', ')}" onchange="updateIntegrationMetadata('${node.id}', 'tags', this.value.split(',').map(t => t.trim()))">
+                            <div class="form-help">Comma-separated tags</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Update Node Data
+        function updateNodeData(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'system') {
+                node.data[field] = value;
+                integrationData.systems[nodeId][field] = value;
+                renderCanvas();
+            }
+        }
+
+        // Update Integration Data
+        function updateIntegrationData(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                node.data[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration[field] = value;
+                }
+                renderCanvas();
+            }
+        }
+
+        function updateIntegrationEndpoint(nodeId, endpoint, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                node.data[endpoint][field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration[endpoint][field] = value;
+                }
+                renderCanvas();
+            }
+        }
+
+        function updateIntegrationTrigger(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                node.data.trigger[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration.trigger[field] = value;
+                }
+            }
+        }
+
+        function updateIntegrationMetadata(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                node.data.metadata[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration.metadata[field] = value;
+                }
+            }
+        }
+
+        // Delete Node
+        function deleteNode(nodeId) {
+            if (confirm('Are you sure you want to delete this component?')) {
+                const node = canvasNodes.find(n => n.id === nodeId);
+                if (node) {
+                    if (node.type === 'system') {
+                        delete integrationData.systems[nodeId];
+                    } else {
+                        integrationData.integrations = integrationData.integrations.filter(i => i.id !== nodeId);
+                    }
+                    canvasNodes = canvasNodes.filter(n => n.id !== nodeId);
+                    renderCanvas();
+                    document.getElementById('propertiesPanel').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚙️</div>
+                            <h3>Properties</h3>
+                            <p>Select a component to edit its properties</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Clear empty state
+        function clearEmptyState() {
+            const emptyState = document.querySelector('.canvas-inner .empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+
+        // Load JSON File
+        function loadJSONFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    loadIntegrationData(json);
+                    showAlert('success', 'JSON file loaded successfully!');
+                } catch (error) {
+                    showAlert('error', 'Failed to parse JSON: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Load Integration Data
+        function loadIntegrationData(data) {
+            integrationData = data;
+            canvasNodes = [];
+
+            // Create system nodes
+            let systemX = 100;
+            let systemY = 100;
+            Object.keys(data.systems || {}).forEach((sysId, idx) => {
+                const system = data.systems[sysId];
+                canvasNodes.push({
+                    id: sysId,
+                    type: 'system',
+                    subtype: system.type,
+                    data: system,
+                    x: systemX + (idx % 3) * 250,
+                    y: systemY + Math.floor(idx / 3) * 200
+                });
+            });
+
+            // Create integration nodes
+            let integrationY = 400;
+            (data.integrations || []).forEach((integration, idx) => {
+                canvasNodes.push({
+                    id: integration.id,
+                    type: 'integration',
+                    pattern: integration.pattern,
+                    data: integration,
+                    x: 200 + idx * 300,
+                    y: integrationY
+                });
+            });
+
+            renderCanvas();
+            clearEmptyState();
+        }
+
+        // Export JSON
+        function exportJSON() {
+            const json = JSON.stringify(integrationData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${integrationData.info.title.toLowerCase().replace(/\s+/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showAlert('success', 'JSON exported successfully!');
+        }
+
+        // Validate Design
+        function validateDesign() {
+            const errors = [];
+
+            // Check if there are any integrations
+            if (integrationData.integrations.length === 0) {
+                errors.push('No integrations defined');
+            }
+
+            // Validate each integration
+            integrationData.integrations.forEach(integration => {
+                if (!integration.name) {
+                    errors.push(`Integration ${integration.id}: Name is required`);
+                }
+                if (!integration.source.system) {
+                    errors.push(`Integration ${integration.id}: Source system is required`);
+                }
+                if (!integration.target.system) {
+                    errors.push(`Integration ${integration.id}: Target system is required`);
+                }
+                if (integration.source.system === integration.target.system) {
+                    errors.push(`Integration ${integration.id}: Source and target cannot be the same`);
+                }
+            });
+
+            // Validate systems
+            Object.keys(integrationData.systems).forEach(sysId => {
+                const system = integrationData.systems[sysId];
+                if (!system.name) {
+                    errors.push(`System ${sysId}: Name is required`);
+                }
+            });
+
+            if (errors.length > 0) {
+                showAlert('error', 'Validation errors:\n' + errors.map(e => '• ' + e).join('\n'));
+            } else {
+                showAlert('success', 'Validation passed! Your integration design is valid.');
+            }
+        }
+
+        // Clear All
+        function clearAll() {
+            if (confirm('Are you sure you want to clear everything?')) {
+                integrationData = {
+                    version: "1.0.0",
+                    info: {
+                        title: "New Integration",
+                        version: "1.0.0",
+                        description: "",
+                        tags: []
+                    },
+                    systems: {},
+                    integrations: [],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                };
+                canvasNodes = [];
+                selectedNode = null;
+
+                const canvasInner = document.getElementById('canvasInner');
+                canvasInner.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎨</div>
+                        <h3>Start Building Your Integration</h3>
+                        <p>Drag systems and integration patterns from the left panel</p>
+                        <p style="margin-top: 0.5rem;">Or load an existing JSON file or template</p>
+                    </div>
+                `;
+
+                document.getElementById('propertiesPanel').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚙️</div>
+                        <h3>Properties</h3>
+                        <p>Select a component to edit its properties</p>
+                    </div>
+                `;
+            }
+        }
+
+        // New Integration
+        function newIntegration() {
+            showAlert('info', 'Drag an integration pattern from the left panel to the canvas');
+        }
+
+        // Templates
+        function openTemplates() {
+            document.getElementById('templateModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function loadTemplate(templateType) {
+            const templates = {
+                'rest-api': {
+                    version: "1.0.0",
+                    info: {
+                        title: "REST API Integration Template",
+                        version: "1.0.0",
+                        description: "Template for REST API integration",
+                        tags: ["rest-api", "template"]
+                    },
+                    systems: {
+                        "source-api": {
+                            name: "Source API",
+                            type: "external",
+                            description: "Source REST API",
+                            environment: "production"
+                        },
+                        "target-api": {
+                            name: "Target API",
+                            type: "application",
+                            description: "Target REST API",
+                            environment: "production"
+                        }
+                    },
+                    integrations: [{
+                        id: "rest-integration-1",
+                        name: "REST API Integration",
+                        description: "Synchronous REST API data exchange",
+                        pattern: "rest-api",
+                        source: {
+                            system: "source-api",
+                            protocol: "https",
+                            format: "json"
+                        },
+                        target: {
+                            system: "target-api",
+                            protocol: "https",
+                            format: "json"
+                        },
+                        trigger: {
+                            type: "webhook"
+                        },
+                        transformation: {
+                            type: "mapping",
+                            mapping: {}
+                        },
+                        errorHandling: {
+                            retry: {
+                                maxAttempts: 3,
+                                backoff: "exponential",
+                                delay: "2s"
+                            }
+                        },
+                        metadata: {
+                            owner: "Integration Team",
+                            tags: ["rest", "template"]
+                        },
+                        config: {
+                            method: "POST",
+                            path: "/api/endpoint",
+                            timeout: "30s"
+                        }
+                    }],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                },
+                'event-stream': {
+                    version: "1.0.0",
+                    info: {
+                        title: "Event Streaming Template",
+                        version: "1.0.0",
+                        description: "Template for Kafka event streaming",
+                        tags: ["kafka", "event-stream", "template"]
+                    },
+                    systems: {
+                        "producer-system": {
+                            name: "Event Producer",
+                            type: "application",
+                            description: "System producing events",
+                            environment: "production"
+                        },
+                        "consumer-system": {
+                            name: "Event Consumer",
+                            type: "application",
+                            description: "System consuming events",
+                            environment: "production"
+                        }
+                    },
+                    integrations: [{
+                        id: "kafka-stream-1",
+                        name: "Event Stream Integration",
+                        description: "Real-time event streaming via Kafka",
+                        pattern: "event-stream",
+                        source: {
+                            system: "producer-system",
+                            protocol: "kafka",
+                            format: "json"
+                        },
+                        target: {
+                            system: "consumer-system",
+                            protocol: "kafka",
+                            format: "json"
+                        },
+                        trigger: {
+                            type: "event"
+                        },
+                        transformation: {
+                            type: "mapping",
+                            mapping: {}
+                        },
+                        errorHandling: {
+                            retry: {
+                                maxAttempts: 5,
+                                backoff: "exponential",
+                                delay: "1s"
+                            }
+                        },
+                        metadata: {
+                            owner: "Platform Team",
+                            tags: ["kafka", "real-time"]
+                        },
+                        config: {
+                            provider: "kafka",
+                            topic: "events.topic",
+                            partitions: 3,
+                            replicationFactor: 3,
+                            consumerGroup: "consumer-group-1"
+                        }
+                    }],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                },
+                'file-transfer': {
+                    version: "1.0.0",
+                    info: {
+                        title: "File Transfer Template",
+                        version: "1.0.0",
+                        description: "Template for batch file transfer",
+                        tags: ["file-transfer", "batch", "template"]
+                    },
+                    systems: {
+                        "sftp-server": {
+                            name: "SFTP Server",
+                            type: "service",
+                            description: "Secure file transfer server",
+                            environment: "production"
+                        },
+                        "target-storage": {
+                            name: "Target Storage",
+                            type: "database",
+                            description: "Target data storage",
+                            environment: "production"
+                        }
+                    },
+                    integrations: [{
+                        id: "file-transfer-1",
+                        name: "File Transfer Integration",
+                        description: "Scheduled batch file transfer",
+                        pattern: "file-transfer",
+                        source: {
+                            system: "sftp-server",
+                            protocol: "sftp",
+                            format: "csv"
+                        },
+                        target: {
+                            system: "target-storage",
+                            protocol: "jdbc",
+                            format: "csv"
+                        },
+                        trigger: {
+                            type: "schedule"
+                        },
+                        transformation: {
+                            type: "mapping",
+                            mapping: {}
+                        },
+                        errorHandling: {
+                            retry: {
+                                maxAttempts: 3,
+                                backoff: "linear",
+                                delay: "10m"
+                            }
+                        },
+                        metadata: {
+                            owner: "Data Team",
+                            tags: ["batch", "scheduled"]
+                        },
+                        config: {
+                            protocol: "sftp",
+                            directory: "/exports",
+                            filePattern: "*.csv",
+                            polling: {
+                                enabled: true,
+                                interval: "5m"
+                            }
+                        }
+                    }],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                },
+                'messaging': {
+                    version: "1.0.0",
+                    info: {
+                        title: "Messaging Template",
+                        version: "1.0.0",
+                        description: "Template for message queue integration",
+                        tags: ["messaging", "queue", "template"]
+                    },
+                    systems: {
+                        "message-producer": {
+                            name: "Message Producer",
+                            type: "application",
+                            description: "System sending messages",
+                            environment: "production"
+                        },
+                        "message-consumer": {
+                            name: "Message Consumer",
+                            type: "application",
+                            description: "System receiving messages",
+                            environment: "production"
+                        }
+                    },
+                    integrations: [{
+                        id: "messaging-1",
+                        name: "Message Queue Integration",
+                        description: "Asynchronous messaging via queue",
+                        pattern: "messaging",
+                        source: {
+                            system: "message-producer",
+                            protocol: "amqp",
+                            format: "json"
+                        },
+                        target: {
+                            system: "message-consumer",
+                            protocol: "amqp",
+                            format: "json"
+                        },
+                        trigger: {
+                            type: "event"
+                        },
+                        transformation: {
+                            type: "mapping",
+                            mapping: {}
+                        },
+                        errorHandling: {
+                            retry: {
+                                maxAttempts: 3,
+                                backoff: "exponential",
+                                delay: "5s"
+                            }
+                        },
+                        metadata: {
+                            owner: "Integration Team",
+                            tags: ["async", "queue"]
+                        },
+                        config: {
+                            provider: "rabbitmq",
+                            queueName: "integration.queue",
+                            durable: true,
+                            autoAck: false
+                        }
+                    }],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                },
+                'database-sync': {
+                    version: "1.0.0",
+                    info: {
+                        title: "Database Sync Template",
+                        version: "1.0.0",
+                        description: "Template for database synchronization",
+                        tags: ["database", "sync", "template"]
+                    },
+                    systems: {
+                        "source-db": {
+                            name: "Source Database",
+                            type: "database",
+                            description: "Source database system",
+                            environment: "production"
+                        },
+                        "target-db": {
+                            name: "Target Database",
+                            type: "database",
+                            description: "Target database system",
+                            environment: "production"
+                        }
+                    },
+                    integrations: [{
+                        id: "db-sync-1",
+                        name: "Database Sync Integration",
+                        description: "Change data capture synchronization",
+                        pattern: "database-sync",
+                        source: {
+                            system: "source-db",
+                            protocol: "jdbc",
+                            format: "json"
+                        },
+                        target: {
+                            system: "target-db",
+                            protocol: "jdbc",
+                            format: "json"
+                        },
+                        trigger: {
+                            type: "database-change"
+                        },
+                        transformation: {
+                            type: "mapping",
+                            mapping: {}
+                        },
+                        errorHandling: {
+                            retry: {
+                                maxAttempts: 3,
+                                backoff: "fixed",
+                                delay: "30s"
+                            }
+                        },
+                        metadata: {
+                            owner: "Data Team",
+                            tags: ["cdc", "sync"]
+                        },
+                        config: {
+                            syncType: "cdc",
+                            cdcMethod: "log-based",
+                            conflictResolution: "source-wins"
+                        }
+                    }],
+                    components: {
+                        schemas: {},
+                        securitySchemes: {}
+                    }
+                }
+            };
+
+            const template = templates[templateType];
+            if (template) {
+                loadIntegrationData(template);
+                closeModal('templateModal');
+                showAlert('success', `${templateType} template loaded successfully!`);
+            }
+        }
+
+        // Load Example
+        function loadExample(exampleType) {
+            const examples = {
+                'rest-api': 'examples/rest-api-integration.json',
+                'kafka': 'examples/kafka-event-stream.json',
+                'file-transfer': 'examples/file-transfer-batch.json'
+            };
+
+            const examplePath = examples[exampleType];
+            if (examplePath) {
+                fetch(examplePath)
+                    .then(response => response.json())
+                    .then(data => {
+                        loadIntegrationData(data);
+                        showAlert('success', `Example loaded successfully!`);
+                    })
+                    .catch(error => {
+                        showAlert('error', 'Failed to load example: ' + error.message);
+                    });
+            }
+        }
+
+        // Show Alert
+        function showAlert(type, message) {
+            const alertClass = `alert-${type}`;
+            const alertHtml = `
+                <div class="alert ${alertClass}" style="position: fixed; top: 100px; right: 20px; z-index: 1001; max-width: 400px;">
+                    ${message.replace(/\n/g, '<br>')}
+                </div>
+            `;
+
+            const alertDiv = document.createElement('div');
+            alertDiv.innerHTML = alertHtml;
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Click outside to deselect
+        document.getElementById('canvas').addEventListener('click', function(e) {
+            if (e.target === this || e.target.id === 'canvasInner') {
+                selectedNode = null;
+                document.querySelectorAll('.system-node, .integration-node').forEach(n => {
+                    n.classList.remove('selected');
+                });
+                document.getElementById('propertiesPanel').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚙️</div>
+                        <h3>Properties</h3>
+                        <p>Select a component to edit its properties</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

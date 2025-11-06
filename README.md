@@ -8,9 +8,9 @@ BAC4 Integration Modeller provides a **JSON Schema-based**, **standards-complian
 
 ## ✨ Key Features
 
+- 🎨 **NEW: Fully-Featured Visual Designer**: Load existing JSON or build from scratch with drag-and-drop
 - **Multi-Pattern Support**: REST API, SOAP, Kafka, MQ, File Transfer, Batch, Database Sync
 - **JSON-First Design**: Human-readable, Git-friendly integration definitions
-- **Visual Designer**: Drag-and-drop interface for creating integration flows
 - **Code Generation**: Generate implementation code for multiple platforms (Apache Camel, Spring Integration, Node.js, Python)
 - **Auto Documentation**: Generate markdown, HTML, and diagram documentation
 - **Validation Engine**: JSON Schema validation with custom business rules
@@ -20,15 +20,29 @@ BAC4 Integration Modeller provides a **JSON Schema-based**, **standards-complian
 
 ## 🚀 Quick Start
 
-### Installation
+### Option 1: Visual Designer (Recommended for Architects)
+
+**No installation required!** Just open the visual designer:
 
 ```bash
-npm install -g bac4-integration-modeller
+# Simply open in your browser
+open visual-designer.html
 ```
 
-### Create Your First Integration
+Then:
+1. Load an example or start from a template
+2. Drag systems and integrations onto the canvas
+3. Configure properties
+4. Validate and export JSON
+
+See **[Visual Designer Guide](VISUAL_DESIGNER_GUIDE.md)** for detailed instructions.
+
+### Option 2: Command Line (For Developers)
 
 ```bash
+# Install the CLI
+npm install -g bac4-integration-modeller
+
 # Initialize a new integration definition
 bac4 init my-integration
 
@@ -46,6 +60,7 @@ bac4 docs my-integration.json --format html --output ./docs
 
 ### Core Documentation
 
+- **[Visual Designer Guide](VISUAL_DESIGNER_GUIDE.md)**: Complete guide to using the visual designer ⭐
 - **[Research Findings](RESEARCH_FINDINGS.md)**: Comprehensive research on integration standards and patterns
 - **[High-Level Design](HIGH_LEVEL_DESIGN.md)**: Detailed architecture and design documentation
 - **[Build Prompt](BUILD_PROMPT.md)**: Complete implementation guide with code examples
@@ -133,13 +148,35 @@ bac4 docs my-integration.json --format html --output ./docs
 
 ## 🎨 Visual Designer
 
-The web-based visual designer provides a drag-and-drop interface for creating integration flows:
+### 🚀 NEW: Fully-Featured Visual Designer
 
-- **Canvas**: Design integration flows visually
-- **Properties Panel**: Configure integration details
-- **Validation**: Real-time validation with inline errors
-- **Preview**: Live preview of generated code
-- **Export**: Export to multiple formats
+The BAC4 Visual Designer is now **fully featured** and production-ready! Open `visual-designer.html` in any browser to start designing integrations visually.
+
+**Key Capabilities:**
+- ✅ **Load Existing JSON**: Import and visualize existing integration definitions
+- ✅ **Build from Scratch**: Drag-and-drop systems and integration patterns
+- ✅ **Full Configuration**: Edit all properties through intuitive forms
+- ✅ **Visual Connections**: Automatically render connections between systems
+- ✅ **Templates**: Quick-start with pre-built integration templates
+- ✅ **Validation**: Real-time validation against JSON schema
+- ✅ **Export**: Download production-ready JSON definitions
+- ✅ **Examples**: Load real-world examples with one click
+
+**Perfect for Architects:**
+- No coding required
+- Intuitive drag-and-drop interface
+- Visual representation of integration flows
+- Comprehensive property editors
+- Built-in best practices and templates
+
+**Getting Started:**
+1. Open `visual-designer.html` in your browser
+2. Load an example or start from a template
+3. Drag systems and integrations onto the canvas
+4. Configure properties in the right panel
+5. Validate and export your JSON
+
+For detailed instructions, see **[Visual Designer Guide](VISUAL_DESIGNER_GUIDE.md)**
 
 ## 🧩 Extensibility
 
