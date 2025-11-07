@@ -217,6 +217,276 @@
             color: var(--text-secondary);
         }
 
+        /* Palette Search & Organization */
+        .palette-search {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .palette-search input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .palette-search input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .palette-search button {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--text-secondary);
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collapse-icon {
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .collapsible.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 5;
+            font-size: 0.875rem;
+        }
+
+        .palette-item:hover .favorite-btn {
+            opacity: 1;
+        }
+
+        .favorite-btn.active {
+            opacity: 1;
+            background: var(--purple);
+            color: white;
+            border-color: var(--purple);
+        }
+
+        .palette-item.search-hidden {
+            display: none;
+        }
+
+        .palette-item.search-match {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--purple);
+        }
+
+        /* Multi-Select */
+        .node.selected {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+
+        .node.multi-selected {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+
+        .selection-box {
+            position: absolute;
+            border: 2px dashed var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .selection-badge {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--purple);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideInUp 0.3s ease-out;
+            z-index: 1001;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Grid */
+        .canvas.show-grid .canvas-inner {
+            background-image:
+                linear-gradient(to right, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Alignment Guides */
+        .alignment-guide {
+            position: absolute;
+            background: #f59e0b;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .alignment-guide.visible {
+            opacity: 1;
+        }
+
+        .alignment-guide.vertical {
+            width: 2px;
+            height: 100%;
+            top: 0;
+        }
+
+        .alignment-guide.horizontal {
+            height: 2px;
+            width: 100%;
+            left: 0;
+        }
+
+        #gridToggle.active,
+        #snapToggle.active,
+        #guidesToggle.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Mini-Map */
+        .mini-map {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            width: 200px;
+            height: 150px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mini-map.hidden {
+            display: none;
+        }
+
+        .mini-map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mini-map-canvas {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .mini-map-node {
+            position: absolute;
+            border-radius: 2px;
+            border: 1px solid;
+        }
+
+        .mini-map-node.system {
+            background: rgba(59, 130, 246, 0.7);
+            border-color: #3b82f6;
+        }
+
+        .mini-map-node.integration {
+            background: rgba(139, 92, 246, 0.7);
+            border-color: #8b5cf6;
+        }
+
+        .mini-map-viewport {
+            position: absolute;
+            border: 2px solid var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+            cursor: move;
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .shortcuts-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shortcuts-table td:first-child {
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 140px;
+        }
+
+        kbd {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
         /* Canvas */
         .canvas-container {
             position: relative;
@@ -905,6 +1175,15 @@
             <span id="validationIndicator" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: #f3f4f6; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;" onclick="showValidationResults()" title="Click to see validation details">✅ Valid</span>
         </div>
         <div class="toolbar-group">
+            <button class="btn btn-secondary" onclick="selectAll()" title="Select all (Ctrl+A)">Select All</button>
+            <button class="btn btn-secondary" id="bulkActions" onclick="showBulkActionsMenu()" style="display: none;" title="Bulk actions">Actions ▼</button>
+        </div>
+        <div class="toolbar-group">
+            <button class="btn btn-secondary btn-icon" onclick="toggleGrid()" id="gridToggle" title="Toggle grid (Ctrl+G)">#️⃣</button>
+            <button class="btn btn-secondary btn-icon" onclick="toggleSnapToGrid()" id="snapToggle" title="Snap to grid">🧲</button>
+            <button class="btn btn-secondary btn-icon" onclick="toggleAlignmentGuides()" id="guidesToggle" title="Alignment guides">📏</button>
+        </div>
+        <div class="toolbar-group">
             <button class="btn btn-secondary" onclick="autoLayout()" title="Auto-arrange nodes">📐 Auto Layout</button>
             <button class="btn btn-secondary" onclick="fitToView()" title="Fit to view">🔍 Fit View</button>
             <button class="btn btn-secondary" onclick="exportAsPNG()" title="Export as image">🖼️ Export PNG</button>
@@ -918,6 +1197,12 @@
     <div class="container">
         <!-- Left Panel: Component Palette -->
         <div class="palette">
+            <!-- Search Bar -->
+            <div class="palette-search">
+                <input type="text" id="paletteSearch" placeholder="🔍 Search components..." oninput="filterPalette(this.value)">
+                <button onclick="clearPaletteSearch()">✕</button>
+            </div>
+
             <div class="section">
                 <h3>🚀 Quick Start</h3>
                 <div class="quick-actions">
@@ -928,8 +1213,11 @@
             </div>
 
             <div class="section">
-                <h3>🖥️ Systems</h3>
-                <div class="palette-item" draggable="true" data-type="system" data-subtype="application">
+                <h3 class="collapsible" onclick="toggleSection('systems')">
+                    <span class="collapse-icon">▼</span> 🖥️ Systems (20)
+                </h3>
+                <div id="systemsContent">
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="application" data-search-terms="application business app software">
                     <span class="palette-icon">💼</span>
                     <div class="palette-label">
                         <div class="palette-label-title">Application</div>
@@ -1069,11 +1357,15 @@
                         <div class="palette-label-desc">Workday, ADP</div>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="section">
-                <h3>🔌 Integration Patterns</h3>
-                <div class="palette-item" draggable="true" data-type="integration" data-pattern="rest-api">
+                <h3 class="collapsible" onclick="toggleSection('patterns')">
+                    <span class="collapse-icon">▼</span> 🔌 Integration Patterns (13)
+                </h3>
+                <div id="patternsContent">
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="rest-api" data-search-terms="rest api http https web service">
                     <span class="palette-icon">🔌</span>
                     <div class="palette-label">
                         <div class="palette-label-title">REST API</div>
@@ -1163,6 +1455,7 @@
                         <div class="palette-label-title">Custom</div>
                         <div class="palette-label-desc">Custom logic</div>
                     </div>
+                </div>
                 </div>
             </div>
 
@@ -1306,6 +1599,30 @@
 
     <!-- Hidden file input -->
     <input type="file" id="fileInput" accept=".json" onchange="loadJSONFile(event)">
+
+    <!-- Bulk Actions Menu -->
+    <div id="bulkActionsMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" onclick="bulkAlign('left')">⬅️ Align Left</div>
+        <div class="context-menu-item" onclick="bulkAlign('right')">➡️ Align Right</div>
+        <div class="context-menu-item" onclick="bulkAlign('top')">⬆️ Align Top</div>
+        <div class="context-menu-item" onclick="bulkAlign('bottom')">⬇️ Align Bottom</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="bulkDistribute('horizontal')">↔️ Distribute Horizontal</div>
+        <div class="context-menu-item" onclick="bulkDistribute('vertical')">↕️ Distribute Vertical</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="bulkDuplicate()">📋 Duplicate</div>
+        <div class="context-menu-item" onclick="bulkDelete()" style="color: #ef4444;">🗑️ Delete All</div>
+    </div>
+
+    <!-- Mini-Map -->
+    <div class="mini-map" id="miniMap">
+        <div class="mini-map-header">
+            <span>Map</span>
+            <button onclick="toggleMiniMap()" style="background: none; border: none; cursor: pointer; font-size: 0.75rem;">⊙</button>
+        </div>
+        <div class="mini-map-canvas" id="miniMapCanvas"></div>
+        <div class="mini-map-viewport" id="miniMapViewport"></div>
+    </div>
 
     <script>
         // ============ Global State ============
@@ -3330,6 +3647,388 @@
                 alertDiv.remove();
             }, 5000);
         }
+
+        // ============ PHASE 1: Core UX Improvements ============
+
+        // === Palette Search & Filter ===
+        function filterPalette(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            const items = document.querySelectorAll('.palette-item');
+
+            items.forEach(item => {
+                if (!term) {
+                    item.classList.remove('search-hidden', 'search-match');
+                    return;
+                }
+
+                const searchTerms = item.getAttribute('data-search-terms') || '';
+                const title = item.querySelector('.palette-label-title')?.textContent || '';
+                const desc = item.querySelector('.palette-label-desc')?.textContent || '';
+                const searchableText = `${searchTerms} ${title} ${desc}`.toLowerCase();
+
+                if (searchableText.includes(term)) {
+                    item.classList.remove('search-hidden');
+                    item.classList.add('search-match');
+                } else {
+                    item.classList.add('search-hidden');
+                    item.classList.remove('search-match');
+                }
+            });
+        }
+
+        function clearPaletteSearch() {
+            document.getElementById('paletteSearch').value = '';
+            filterPalette('');
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(`${sectionId}Content`);
+            const header = event.currentTarget;
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                header.classList.remove('collapsed');
+            } else {
+                content.style.display = 'none';
+                header.classList.add('collapsed');
+            }
+        }
+
+        // === Multi-Select System ===
+        let selectedNodes = new Set();
+
+        function selectAll() {
+            selectedNodes.clear();
+            canvasNodes.forEach(node => selectedNodes.add(node.id));
+            updateSelectionUI();
+            showAlert('info', `Selected ${canvasNodes.length} items`);
+        }
+
+        function updateSelectionUI() {
+            document.querySelectorAll('.system-node, .integration-node').forEach(nodeEl => {
+                const nodeId = nodeEl.getAttribute('data-node-id');
+                if (selectedNodes.has(nodeId)) {
+                    nodeEl.classList.add(selectedNodes.size === 1 ? 'selected' : 'multi-selected');
+                } else {
+                    nodeEl.classList.remove('selected', 'multi-selected');
+                }
+            });
+
+            const bulkBtn = document.getElementById('bulkActions');
+            if (selectedNodes.size > 1) {
+                bulkBtn.style.display = 'block';
+                bulkBtn.textContent = `Actions (${selectedNodes.size}) ▼`;
+            } else {
+                bulkBtn.style.display = 'none';
+            }
+
+            updateSelectionBadge();
+        }
+
+        function updateSelectionBadge() {
+            let badge = document.getElementById('selectionBadge');
+
+            if (selectedNodes.size > 1) {
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'selectionBadge';
+                    badge.className = 'selection-badge';
+                    document.body.appendChild(badge);
+                }
+                badge.innerHTML = `<span>${selectedNodes.size} selected</span>
+                    <button onclick="deselectAll()" style="background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 1.5rem; height: 1.5rem; cursor: pointer; color: white;">✕</button>`;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        // Override deselectAll to work with multi-select
+        const originalDeselectAll = deselectAll;
+        deselectAll = function() {
+            selectedNodes.clear();
+            updateSelectionUI();
+            originalDeselectAll();
+        };
+
+        // === Bulk Operations ===
+        function showBulkActionsMenu() {
+            const menu = document.getElementById('bulkActionsMenu');
+            const btn = document.getElementById('bulkActions');
+            const rect = btn.getBoundingClientRect();
+
+            menu.style.display = 'block';
+            menu.style.left = rect.left + 'px';
+            menu.style.top = (rect.bottom + 5) + 'px';
+
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target) && e.target !== btn) {
+                        menu.style.display = 'none';
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        function bulkAlign(direction) {
+            if (selectedNodes.size < 2) return;
+
+            const nodes = Array.from(selectedNodes).map(id => canvasNodes.find(n => n.id === id));
+
+            if (direction === 'left') {
+                const minX = Math.min(...nodes.map(n => n.x));
+                nodes.forEach(node => node.x = minX);
+            } else if (direction === 'right') {
+                const maxX = Math.max(...nodes.map(n => n.x + 200));
+                nodes.forEach(node => node.x = maxX - 200);
+            } else if (direction === 'top') {
+                const minY = Math.min(...nodes.map(n => n.y));
+                nodes.forEach(node => node.y = minY);
+            } else if (direction === 'bottom') {
+                const maxY = Math.max(...nodes.map(n => n.y + 150));
+                nodes.forEach(node => node.y = maxY - 150);
+            }
+
+            renderCanvas();
+            saveHistory();
+            showAlert('success', `Aligned ${nodes.length} items to ${direction}`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDistribute(direction) {
+            if (selectedNodes.size < 3) {
+                showAlert('warning', 'Need at least 3 items to distribute');
+                return;
+            }
+
+            const nodes = Array.from(selectedNodes)
+                .map(id => canvasNodes.find(n => n.id === id))
+                .sort((a, b) => direction === 'horizontal' ? a.x - b.x : a.y - b.y);
+
+            if (direction === 'horizontal') {
+                const minX = nodes[0].x;
+                const maxX = nodes[nodes.length - 1].x;
+                const spacing = (maxX - minX) / (nodes.length - 1);
+                nodes.forEach((node, i) => {
+                    if (i > 0 && i < nodes.length - 1) node.x = minX + spacing * i;
+                });
+            } else {
+                const minY = nodes[0].y;
+                const maxY = nodes[nodes.length - 1].y;
+                const spacing = (maxY - minY) / (nodes.length - 1);
+                nodes.forEach((node, i) => {
+                    if (i > 0 && i < nodes.length - 1) node.y = minY + spacing * i;
+                });
+            }
+
+            renderCanvas();
+            saveHistory();
+            showAlert('success', `Distributed ${nodes.length} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDuplicate() {
+            if (selectedNodes.size === 0) return;
+
+            const newNodes = [];
+            selectedNodes.forEach(nodeId => {
+                const node = canvasNodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                const newId = 'node-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const newNode = {
+                    ...JSON.parse(JSON.stringify(node)),
+                    id: newId,
+                    x: node.x + 50,
+                    y: node.y + 50,
+                    data: { ...node.data, name: node.data.name + ' (Copy)' }
+                };
+
+                canvasNodes.push(newNode);
+                newNodes.push(newId);
+
+                if (node.type === 'system') {
+                    integrationData.systems[newId] = newNode.data;
+                } else {
+                    integrationData.integrations.push({ ...newNode.data, id: newId });
+                }
+            });
+
+            selectedNodes.clear();
+            newNodes.forEach(id => selectedNodes.add(id));
+            renderCanvas();
+            updateSelectionUI();
+            saveHistory();
+            showAlert('success', `Duplicated ${newNodes.length} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDelete() {
+            if (selectedNodes.size === 0) return;
+
+            const count = selectedNodes.size;
+            if (!confirm(`Delete ${count} selected item${count > 1 ? 's' : ''}?`)) return;
+
+            selectedNodes.forEach(nodeId => {
+                const node = canvasNodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                if (node.type === 'system') {
+                    delete integrationData.systems[nodeId];
+                    integrationData.integrations.forEach(i => {
+                        if (i.source.system === nodeId) i.source.system = '';
+                        if (i.target.system === nodeId) i.target.system = '';
+                    });
+                } else {
+                    integrationData.integrations = integrationData.integrations.filter(i => i.id !== nodeId);
+                }
+            });
+
+            canvasNodes = canvasNodes.filter(n => !selectedNodes.has(n.id));
+            selectedNodes.clear();
+            renderCanvas();
+            updateSelectionUI();
+            saveHistory();
+            showAlert('success', `Deleted ${count} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        // === Grid & Alignment Guides ===
+        let gridSettings = {
+            enabled: false,
+            snapEnabled: false,
+            guidesEnabled: true,
+            gridSize: 20
+        };
+
+        function toggleGrid() {
+            gridSettings.enabled = !gridSettings.enabled;
+            const canvas = document.getElementById('canvas');
+            const btn = document.getElementById('gridToggle');
+
+            if (gridSettings.enabled) {
+                canvas.classList.add('show-grid');
+                btn.classList.add('active');
+            } else {
+                canvas.classList.remove('show-grid');
+                btn.classList.remove('active');
+            }
+        }
+
+        function toggleSnapToGrid() {
+            gridSettings.snapEnabled = !gridSettings.snapEnabled;
+            const btn = document.getElementById('snapToggle');
+            btn.classList.toggle('active', gridSettings.snapEnabled);
+            showAlert('info', gridSettings.snapEnabled ? 'Snap to grid enabled' : 'Snap to grid disabled');
+        }
+
+        function toggleAlignmentGuides() {
+            gridSettings.guidesEnabled = !gridSettings.guidesEnabled;
+            const btn = document.getElementById('guidesToggle');
+            btn.classList.toggle('active', gridSettings.guidesEnabled);
+        }
+
+        function snapToGrid(value) {
+            if (!gridSettings.snapEnabled) return value;
+            return Math.round(value / gridSettings.gridSize) * gridSettings.gridSize;
+        }
+
+        // === Mini-Map ===
+        let miniMapState = { enabled: true };
+
+        function toggleMiniMap() {
+            miniMapState.enabled = !miniMapState.enabled;
+            document.getElementById('miniMap').classList.toggle('hidden', !miniMapState.enabled);
+        }
+
+        function renderMiniMap() {
+            if (!miniMapState.enabled || canvasNodes.length === 0) return;
+
+            const container = document.getElementById('miniMapCanvas');
+            container.innerHTML = '';
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            canvasNodes.forEach(node => {
+                minX = Math.min(minX, node.x);
+                minY = Math.min(minY, node.y);
+                maxX = Math.max(maxX, node.x + 200);
+                maxY = Math.max(maxY, node.y + 150);
+            });
+
+            const scale = Math.min(container.clientWidth / (maxX - minX), container.clientHeight / (maxY - minY), 1);
+
+            canvasNodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `mini-map-node ${node.type}`;
+                nodeEl.style.left = ((node.x - minX) * scale) + 'px';
+                nodeEl.style.top = ((node.y - minY) * scale) + 'px';
+                nodeEl.style.width = (200 * scale) + 'px';
+                nodeEl.style.height = (150 * scale) + 'px';
+                container.appendChild(nodeEl);
+            });
+        }
+
+        // Update mini-map when canvas changes
+        const originalRenderCanvas = renderCanvas;
+        renderCanvas = function() {
+            originalRenderCanvas();
+            setTimeout(renderMiniMap, 100);
+        };
+
+        // === Enhanced Keyboard Shortcuts ===
+        document.addEventListener('keydown', (e) => {
+            if (e.target.matches('input, textarea, select')) return;
+
+            const ctrl = e.ctrlKey || e.metaKey;
+
+            // Ctrl+A: Select all
+            if (ctrl && e.key === 'a') {
+                e.preventDefault();
+                selectAll();
+            }
+
+            // Escape: Deselect
+            if (e.key === 'Escape') {
+                deselectAll();
+            }
+
+            // Delete/Backspace: Delete selected
+            if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodes.size > 0) {
+                e.preventDefault();
+                bulkDelete();
+            }
+
+            // Ctrl+D: Duplicate
+            if (ctrl && e.key === 'd' && selectedNodes.size > 0) {
+                e.preventDefault();
+                bulkDuplicate();
+            }
+
+            // Ctrl+G: Toggle grid
+            if (ctrl && e.key === 'g') {
+                e.preventDefault();
+                toggleGrid();
+            }
+
+            // Ctrl+Arrow: Bulk align
+            if (ctrl && selectedNodes.size > 1) {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); bulkAlign('left'); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); bulkAlign('right'); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); bulkAlign('top'); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); bulkAlign('bottom'); }
+            }
+
+            // Ctrl+K: Focus search
+            if (ctrl && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('paletteSearch')?.focus();
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMiniMap();
+        });
     </script>
 </body>
 </html>
