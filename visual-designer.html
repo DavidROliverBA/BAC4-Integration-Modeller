@@ -328,6 +328,15 @@
             animation: pulse 0.6s ease-in-out infinite;
         }
 
+        .connection-point.snap-target {
+            background: #10b981;
+            width: 20px;
+            height: 20px;
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.5);
+            border-color: #fff;
+            border-width: 4px;
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2); }
@@ -1241,39 +1250,78 @@
         }
 
         // ============ Canvas Interactions ============
+        function getEventCoords(e) {
+            // Unified coordinate extraction for mouse, touch, and pointer events
+            if (e.touches && e.touches.length > 0) {
+                return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+            }
+            return { clientX: e.clientX, clientY: e.clientY };
+        }
+
         function setupCanvasInteractions() {
             const canvas = document.getElementById('canvas');
+            const usePointerEvents = 'PointerEvent' in window;
 
-            // Pan canvas
-            canvas.addEventListener('mousedown', (e) => {
+            // Pan canvas - unified handler
+            const handlePanStart = (e) => {
                 if (e.target === canvas || e.target.id === 'canvasInner' || e.target.id === 'connectionsSvg') {
+                    const { clientX, clientY } = getEventCoords(e);
                     isPanning = true;
-                    panStart = { x: e.clientX - canvasOffset.x, y: e.clientY - canvasOffset.y };
+                    panStart = { x: clientX - canvasOffset.x, y: clientY - canvasOffset.y };
                     canvas.classList.add('grabbing');
                 }
-            });
+            };
 
-            document.addEventListener('mousemove', (e) => {
+            const handlePanMove = (e) => {
+                const { clientX, clientY } = getEventCoords(e);
+
                 if (isPanning) {
-                    canvasOffset.x = e.clientX - panStart.x;
-                    canvasOffset.y = e.clientY - panStart.y;
+                    canvasOffset.x = clientX - panStart.x;
+                    canvasOffset.y = clientY - panStart.y;
                     updateCanvasTransform();
                 }
 
                 // Update temp connection line
                 if (connectionStart && tempConnection) {
                     const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX - rect.left - canvasOffset.x) / zoomLevel;
-                    const y = (e.clientY - rect.top - canvasOffset.y) / zoomLevel;
+                    const x = (clientX - rect.left - canvasOffset.x) / zoomLevel;
+                    const y = (clientY - rect.top - canvasOffset.y) / zoomLevel;
                     updateTempConnection(x, y);
                 }
-            });
+            };
 
-            document.addEventListener('mouseup', () => {
+            const handlePanEnd = () => {
                 isPanning = false;
                 canvas.classList.remove('grabbing');
                 // Note: Connection cleanup is handled by onConnectionEnd
-            });
+            };
+
+            // Use Pointer Events if available (better touch support)
+            if (usePointerEvents) {
+                canvas.addEventListener('pointerdown', handlePanStart);
+                document.addEventListener('pointermove', handlePanMove);
+                document.addEventListener('pointerup', handlePanEnd);
+                document.addEventListener('pointercancel', handlePanEnd);
+            } else {
+                // Fallback to mouse events
+                canvas.addEventListener('mousedown', handlePanStart);
+                document.addEventListener('mousemove', handlePanMove);
+                document.addEventListener('mouseup', handlePanEnd);
+
+                // Add touch support for older browsers
+                canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handlePanStart(e);
+                });
+                document.addEventListener('touchmove', (e) => {
+                    if (isPanning || connectionStart) e.preventDefault();
+                    handlePanMove(e);
+                });
+                document.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    handlePanEnd(e);
+                });
+            }
 
             // Zoom with mouse wheel
             canvas.addEventListener('wheel', (e) => {
@@ -1486,22 +1534,25 @@
             let dragStartPos = { x: 0, y: 0 };
             let nodeDragStart = { x: 0, y: 0 };
             let isDragging = false;
+            const usePointerEvents = 'PointerEvent' in window;
 
-            nodeEl.addEventListener('mousedown', (e) => {
+            const handleDragStart = (e) => {
                 if (e.target.classList.contains('connection-point')) return;
 
+                const { clientX, clientY } = getEventCoords(e);
                 isDragging = true;
                 nodeEl.classList.add('dragging');
-                dragStartPos = { x: e.clientX, y: e.clientY };
+                dragStartPos = { x: clientX, y: clientY };
                 nodeDragStart = { x: node.x, y: node.y };
                 e.preventDefault();
-            });
+            };
 
-            document.addEventListener('mousemove', (e) => {
+            const handleDragMove = (e) => {
                 if (!isDragging) return;
 
-                const dx = (e.clientX - dragStartPos.x) / zoomLevel;
-                const dy = (e.clientY - dragStartPos.y) / zoomLevel;
+                const { clientX, clientY } = getEventCoords(e);
+                const dx = (clientX - dragStartPos.x) / zoomLevel;
+                const dy = (clientY - dragStartPos.y) / zoomLevel;
 
                 node.x = nodeDragStart.x + dx;
                 node.y = nodeDragStart.y + dy;
@@ -1510,31 +1561,59 @@
                 nodeEl.style.top = node.y + 'px';
 
                 renderConnections();
-            });
+            };
 
-            document.addEventListener('mouseup', () => {
+            const handleDragEnd = () => {
                 if (isDragging) {
                     isDragging = false;
                     nodeEl.classList.remove('dragging');
                     saveHistory();
                 }
-            });
+            };
+
+            if (usePointerEvents) {
+                nodeEl.addEventListener('pointerdown', handleDragStart);
+                document.addEventListener('pointermove', handleDragMove);
+                document.addEventListener('pointerup', handleDragEnd);
+            } else {
+                nodeEl.addEventListener('mousedown', handleDragStart);
+                document.addEventListener('mousemove', handleDragMove);
+                document.addEventListener('mouseup', handleDragEnd);
+
+                nodeEl.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleDragStart(e);
+                });
+            }
         }
 
         // ============ Connection Points ============
         function setupConnectionPoints(nodeEl, node) {
             const connectionPoints = nodeEl.querySelectorAll('.connection-point');
+            const usePointerEvents = 'PointerEvent' in window;
 
             connectionPoints.forEach(point => {
-                point.addEventListener('mousedown', (e) => {
+                const handleConnectionStart = (e) => {
                     e.stopPropagation();
                     startConnection(node, point);
-                });
+                };
+
+                if (usePointerEvents) {
+                    point.addEventListener('pointerdown', handleConnectionStart);
+                } else {
+                    point.addEventListener('mousedown', handleConnectionStart);
+                    point.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleConnectionStart(e);
+                    });
+                }
             });
         }
 
         function startConnection(node, point) {
             const position = point.dataset.position;
+            const usePointerEvents = 'PointerEvent' in window;
+
             connectionStart = {
                 node: node,
                 position: position,
@@ -1544,15 +1623,25 @@
             // Add visual feedback
             point.classList.add('connecting');
 
-            // Create temporary connection line
+            // Create temporary connection path (bezier curve)
             const svg = document.getElementById('connectionsSvg');
-            tempConnection = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            tempConnection = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             tempConnection.setAttribute('class', 'connection-line creating');
+            tempConnection.setAttribute('stroke', '#8b5cf6');
+            tempConnection.setAttribute('stroke-width', '3');
+            tempConnection.setAttribute('fill', 'none');
             svg.appendChild(tempConnection);
 
-            // Set up mouse move to draw temp line
-            document.addEventListener('mousemove', onConnectionMove);
-            document.addEventListener('mouseup', onConnectionEnd, { once: true });
+            // Set up event listeners based on browser capability
+            if (usePointerEvents) {
+                document.addEventListener('pointermove', onConnectionMove);
+                document.addEventListener('pointerup', onConnectionEnd, { once: true });
+            } else {
+                document.addEventListener('mousemove', onConnectionMove);
+                document.addEventListener('mouseup', onConnectionEnd, { once: true });
+                document.addEventListener('touchmove', onConnectionMove);
+                document.addEventListener('touchend', onConnectionEnd, { once: true });
+            }
         }
 
         function getConnectionPointCoordinates(node, position) {
@@ -1574,32 +1663,145 @@
             }
         }
 
+        function createBezierPath(x1, y1, x2, y2, dir1, dir2) {
+            // Calculate control points based on connection directions
+            const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const offset = Math.min(distance * 0.4, 150);
+
+            let cx1, cy1, cx2, cy2;
+
+            // First control point based on source direction
+            switch(dir1) {
+                case 'right':
+                    cx1 = x1 + offset;
+                    cy1 = y1;
+                    break;
+                case 'left':
+                    cx1 = x1 - offset;
+                    cy1 = y1;
+                    break;
+                case 'top':
+                    cx1 = x1;
+                    cy1 = y1 - offset;
+                    break;
+                case 'bottom':
+                    cx1 = x1;
+                    cy1 = y1 + offset;
+                    break;
+                default:
+                    cx1 = x1 + offset;
+                    cy1 = y1;
+            }
+
+            // Second control point based on target direction
+            switch(dir2) {
+                case 'right':
+                    cx2 = x2 + offset;
+                    cy2 = y2;
+                    break;
+                case 'left':
+                    cx2 = x2 - offset;
+                    cy2 = y2;
+                    break;
+                case 'top':
+                    cx2 = x2;
+                    cy2 = y2 - offset;
+                    break;
+                case 'bottom':
+                    cx2 = x2;
+                    cy2 = y2 + offset;
+                    break;
+                default:
+                    cx2 = x2 - offset;
+                    cy2 = y2;
+            }
+
+            return `M ${x1},${y1} C ${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`;
+        }
+
         function onConnectionMove(e) {
             if (!connectionStart || !tempConnection) return;
 
             const canvas = document.getElementById('canvas');
             const rect = canvas.getBoundingClientRect();
             const startNode = connectionStart.node;
+            const { clientX, clientY } = getEventCoords(e);
 
             // Get the connection point coordinates based on position
             const startCoords = getConnectionPointCoordinates(startNode, connectionStart.position);
 
-            const endX = (e.clientX - rect.left - canvasOffset.x) / zoomLevel;
-            const endY = (e.clientY - rect.top - canvasOffset.y) / zoomLevel;
+            const endX = (clientX - rect.left - canvasOffset.x) / zoomLevel;
+            const endY = (clientY - rect.top - canvasOffset.y) / zoomLevel;
 
-            tempConnection.setAttribute('x1', startCoords.x);
-            tempConnection.setAttribute('y1', startCoords.y);
-            tempConnection.setAttribute('x2', endX);
-            tempConnection.setAttribute('y2', endY);
+            // Check for nearby connection points for snap feedback
+            const snapDistance = 30;
+            let nearestPoint = null;
+            let minDist = snapDistance;
+
+            document.querySelectorAll('.connection-point').forEach(point => {
+                if (point === connectionStart.point) return;
+
+                const pointRect = point.getBoundingClientRect();
+                const pointX = (pointRect.left + pointRect.width / 2 - rect.left - canvasOffset.x) / zoomLevel;
+                const pointY = (pointRect.top + pointRect.height / 2 - rect.top - canvasOffset.y) / zoomLevel;
+
+                const dist = Math.sqrt((endX - pointX) ** 2 + (endY - pointY) ** 2);
+
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestPoint = point;
+                }
+            });
+
+            // Update snap visual feedback
+            document.querySelectorAll('.connection-point.snap-target').forEach(p => {
+                p.classList.remove('snap-target');
+            });
+
+            if (nearestPoint) {
+                nearestPoint.classList.add('snap-target');
+            }
+
+            // Create bezier curve for smooth connection
+            // Default to opposite direction for the end point
+            const oppositeDir = {
+                'top': 'bottom',
+                'bottom': 'top',
+                'left': 'right',
+                'right': 'left'
+            };
+            const endDir = oppositeDir[connectionStart.position] || 'left';
+
+            const pathData = createBezierPath(
+                startCoords.x, startCoords.y,
+                endX, endY,
+                connectionStart.position,
+                endDir
+            );
+
+            tempConnection.setAttribute('d', pathData);
         }
 
         function onConnectionEnd(e) {
-            document.removeEventListener('mousemove', onConnectionMove);
+            const usePointerEvents = 'PointerEvent' in window;
+
+            // Remove event listeners
+            if (usePointerEvents) {
+                document.removeEventListener('pointermove', onConnectionMove);
+            } else {
+                document.removeEventListener('mousemove', onConnectionMove);
+                document.removeEventListener('touchmove', onConnectionMove);
+            }
 
             // Remove visual feedback
             if (connectionStart && connectionStart.point) {
                 connectionStart.point.classList.remove('connecting');
             }
+
+            // Remove snap-target highlights
+            document.querySelectorAll('.connection-point.snap-target').forEach(p => {
+                p.classList.remove('snap-target');
+            });
 
             // Check if we ended on a connection point
             const target = e.target;
@@ -1627,10 +1829,23 @@
             const startNode = connectionStart.node;
             const startCoords = getConnectionPointCoordinates(startNode, connectionStart.position);
 
-            tempConnection.setAttribute('x1', startCoords.x);
-            tempConnection.setAttribute('y1', startCoords.y);
-            tempConnection.setAttribute('x2', x);
-            tempConnection.setAttribute('y2', y);
+            // Create bezier curve for smooth connection
+            const oppositeDir = {
+                'top': 'bottom',
+                'bottom': 'top',
+                'left': 'right',
+                'right': 'left'
+            };
+            const endDir = oppositeDir[connectionStart.position] || 'left';
+
+            const pathData = createBezierPath(
+                startCoords.x, startCoords.y,
+                x, y,
+                connectionStart.position,
+                endDir
+            );
+
+            tempConnection.setAttribute('d', pathData);
         }
 
         function createConnectionBetweenNodes(node1, node2) {
@@ -1675,7 +1890,7 @@
         // ============ Render Connections ============
         function renderConnections() {
             const svg = document.getElementById('connectionsSvg');
-            svg.querySelectorAll('line:not(.creating), text, rect').forEach(el => el.remove());
+            svg.querySelectorAll('path:not(.creating), text, rect').forEach(el => el.remove());
 
             canvasNodes.filter(n => n.type === 'integration').forEach(integration => {
                 const sourceSystemId = integration.data.source?.system;
@@ -1707,13 +1922,20 @@
                     const sourceCoords = getConnectionPointCoordinates(sourceNode, sourcePos);
                     const integrationSourceCoords = getConnectionPointCoordinates(integration, integrationSourcePos);
 
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('class', 'connection-line');
-                    line.setAttribute('x1', sourceCoords.x);
-                    line.setAttribute('y1', sourceCoords.y);
-                    line.setAttribute('x2', integrationSourceCoords.x);
-                    line.setAttribute('y2', integrationSourceCoords.y);
-                    svg.appendChild(line);
+                    // Create bezier curve connection
+                    const pathData = createBezierPath(
+                        sourceCoords.x, sourceCoords.y,
+                        integrationSourceCoords.x, integrationSourceCoords.y,
+                        sourcePos, integrationSourcePos
+                    );
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('class', 'connection-line');
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('stroke', '#8b5cf6');
+                    path.setAttribute('stroke-width', '3');
+                    path.setAttribute('fill', 'none');
+                    svg.appendChild(path);
                 }
 
                 // Draw target connection
@@ -1733,13 +1955,20 @@
                     const integrationTargetCoords = getConnectionPointCoordinates(integration, integrationTargetPos);
                     const targetCoords = getConnectionPointCoordinates(targetNode, targetPos);
 
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('class', 'connection-line');
-                    line.setAttribute('x1', integrationTargetCoords.x);
-                    line.setAttribute('y1', integrationTargetCoords.y);
-                    line.setAttribute('x2', targetCoords.x);
-                    line.setAttribute('y2', targetCoords.y);
-                    svg.appendChild(line);
+                    // Create bezier curve connection
+                    const pathData = createBezierPath(
+                        integrationTargetCoords.x, integrationTargetCoords.y,
+                        targetCoords.x, targetCoords.y,
+                        integrationTargetPos, targetPos
+                    );
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('class', 'connection-line');
+                    path.setAttribute('d', pathData);
+                    path.setAttribute('stroke', '#8b5cf6');
+                    path.setAttribute('stroke-width', '3');
+                    path.setAttribute('fill', 'none');
+                    svg.appendChild(path);
 
                     // Add label at midpoint
                     const midX = (integrationTargetCoords.x + targetCoords.x) / 2;
