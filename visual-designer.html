@@ -1158,9 +1158,26 @@
         <div class="header-actions">
             <button class="btn btn-primary" onclick="openTemplates()" title="Load a template">📑 Templates</button>
             <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()" title="Load JSON file">📁 Load</button>
-            <button class="btn btn-success" onclick="exportJSON()" title="Export to JSON">💾 Export</button>
+            <button class="btn btn-success" onclick="showExportMenu(event)" title="Export options">💾 Export ▼</button>
+            <button class="btn btn-secondary" onclick="showToolsMenu(event)" title="Tools & utilities">🔧 Tools ▼</button>
             <button class="btn btn-secondary" onclick="toggleHelp()" title="Show keyboard shortcuts">❓ Help</button>
         </div>
+    </div>
+
+    <!-- Export Menu -->
+    <div id="exportMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" onclick="exportJSON()">💾 Export JSON</div>
+        <div class="context-menu-item" onclick="exportAsPNG()">🖼️ Export as PNG</div>
+        <div class="context-menu-item" onclick="exportAsDocumentation()">📄 Export as Documentation</div>
+        <div class="context-menu-item" onclick="exportAsMarkdown()">📝 Export as Markdown</div>
+    </div>
+
+    <!-- Tools Menu -->
+    <div id="toolsMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" onclick="showCostEstimator()">💰 Cost Estimator</div>
+        <div class="context-menu-item" onclick="showComplianceChecker()">🔒 Compliance Checker</div>
+        <div class="context-menu-item" onclick="showChangeHistory()">📜 Change History</div>
+        <div class="context-menu-item" onclick="addCommentToCanvas()">💬 Add Comment</div>
     </div>
 
     <!-- Toolbar -->
@@ -1589,6 +1606,73 @@
                 <div class="template-card" onclick="loadTemplate('database-sync')">
                     <div class="template-title">🔄 Database Sync</div>
                     <div class="template-desc">Change data capture for real-time database synchronization and replication</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Estimator Modal -->
+    <div class="modal" id="costEstimatorModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>💰 Cost Estimator</h2>
+                <button class="close-btn" onclick="closeModal('costEstimatorModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">Estimate infrastructure and operational costs for your integrations.</p>
+
+                <div id="costBreakdown" style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem;">Cost Breakdown</h3>
+                    <div id="costItems"></div>
+                    <div style="border-top: 2px solid var(--border); margin-top: 1rem; padding-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.25rem;">
+                            <span>Total Monthly Cost:</span>
+                            <span id="totalCost" style="color: var(--purple);">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                    <strong>Note:</strong> Costs are estimates based on average market rates. Actual costs may vary.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compliance Checker Modal -->
+    <div class="modal" id="complianceCheckerModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>🔒 Compliance Checker</h2>
+                <button class="close-btn" onclick="closeModal('complianceCheckerModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">Check your integration design against security and compliance standards.</p>
+
+                <div id="complianceResults"></div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                    <button class="btn btn-primary" onclick="runComplianceCheck()">🔍 Run Compliance Check</button>
+                    <button class="btn btn-secondary" onclick="exportComplianceReport()">📄 Export Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change History Modal -->
+    <div class="modal" id="changeHistoryModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>📜 Change History</h2>
+                <button class="close-btn" onclick="closeModal('changeHistoryModal')">×</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">View and restore previous versions of your integration design.</p>
+
+                <div id="historyTimeline" style="max-height: 400px; overflow-y: auto;"></div>
+
+                <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                    <strong>Tip:</strong> Click on any history entry to restore that version.
                 </div>
             </div>
         </div>
@@ -4637,9 +4721,506 @@
             }
         });
 
+        // ============ PHASE 3 & 4: Export, Tools, and Advanced Features ============
+
+        function showExportMenu(event) {
+            const menu = document.getElementById('exportMenu');
+            menu.style.display = 'block';
+            menu.style.left = event.target.getBoundingClientRect().left + 'px';
+            menu.style.top = (event.target.getBoundingClientRect().bottom + 5) + 'px';
+
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target) && e.target !== event.target) {
+                        menu.style.display = 'none';
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        function showToolsMenu(event) {
+            const menu = document.getElementById('toolsMenu');
+            menu.style.display = 'block';
+            menu.style.left = event.target.getBoundingClientRect().left + 'px';
+            menu.style.top = (event.target.getBoundingClientRect().bottom + 5) + 'px';
+
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target) && e.target !== event.target) {
+                        menu.style.display = 'none';
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        // Export as PNG using canvas rendering
+        function exportAsPNG() {
+            const canvas = document.getElementById('canvas');
+            const canvasInner = canvas.querySelector('.canvas-inner');
+
+            // Calculate bounding box of all nodes
+            if (canvasNodes.length === 0) {
+                showAlert('warning', 'No nodes to export');
+                return;
+            }
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            canvasNodes.forEach(node => {
+                minX = Math.min(minX, node.x);
+                minY = Math.min(minY, node.y);
+                maxX = Math.max(maxX, node.x + 200);
+                maxY = Math.max(maxY, node.y + 150);
+            });
+
+            const padding = 50;
+            const width = (maxX - minX) + (padding * 2);
+            const height = (maxY - minY) + (padding * 2);
+
+            // Create temporary canvas
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const ctx = tempCanvas.getContext('2d');
+
+            // White background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw nodes
+            canvasNodes.forEach(node => {
+                const x = node.x - minX + padding;
+                const y = node.y - minY + padding;
+
+                // Draw node box
+                ctx.fillStyle = node.type === 'system' ? '#3b82f6' : '#8b5cf6';
+                ctx.fillRect(x, y, 200, 150);
+
+                // Draw border
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, 200, 150);
+
+                // Draw text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(node.data.name || 'Node', x + 100, y + 75);
+            });
+
+            // Draw connections
+            integrationData.integrations.forEach(integration => {
+                if (!integration.source.system || !integration.target.system) return;
+
+                const sourceNode = canvasNodes.find(n => n.id === integration.source.system);
+                const targetNode = canvasNodes.find(n => n.id === integration.target.system);
+
+                if (!sourceNode || !targetNode) return;
+
+                const x1 = sourceNode.x - minX + padding + 100;
+                const y1 = sourceNode.y - minY + padding + 75;
+                const x2 = targetNode.x - minX + padding + 100;
+                const y2 = targetNode.y - minY + padding + 75;
+
+                ctx.strokeStyle = '#8b5cf6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                // Draw arrow
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - 15 * Math.cos(angle - Math.PI / 6), y2 - 15 * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(x2 - 15 * Math.cos(angle + Math.PI / 6), y2 - 15 * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = '#8b5cf6';
+                ctx.fill();
+            });
+
+            // Download
+            tempCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${integrationData.info.title.toLowerCase().replace(/\s+/g, '-')}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showAlert('success', 'PNG exported successfully!');
+            });
+        }
+
+        // Export as Documentation
+        function exportAsDocumentation() {
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>${integrationData.info.title} - Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        h1 { color: #1e293b; border-bottom: 3px solid #8b5cf6; padding-bottom: 0.5rem; }
+        h2 { color: #475569; margin-top: 2rem; }
+        .system { background: #e0e7ff; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; border-left: 4px solid #3b82f6; }
+        .integration { background: #f3e8ff; padding: 1rem; margin: 1rem 0; border-radius: 0.5rem; border-left: 4px solid #8b5cf6; }
+        .metadata { display: grid; grid-template-columns: 150px 1fr; gap: 0.5rem; margin: 0.5rem 0; }
+        .metadata dt { font-weight: bold; color: #64748b; }
+        .metadata dd { margin: 0; }
+    </style>
+</head>
+<body>
+    <h1>${integrationData.info.title}</h1>
+    <p>${integrationData.info.description || ''}</p>
+
+    <h2>Systems (${Object.keys(integrationData.systems).length})</h2>
+    ${Object.entries(integrationData.systems).map(([id, system]) => `
+        <div class="system">
+            <h3>${system.name}</h3>
+            <dl class="metadata">
+                <dt>Type:</dt><dd>${system.type}</dd>
+                <dt>Description:</dt><dd>${system.description || 'N/A'}</dd>
+                <dt>Owner:</dt><dd>${system.owner || 'N/A'}</dd>
+                <dt>Environment:</dt><dd>${system.environment || 'N/A'}</dd>
+            </dl>
+        </div>
+    `).join('')}
+
+    <h2>Integrations (${integrationData.integrations.length})</h2>
+    ${integrationData.integrations.map(integration => `
+        <div class="integration">
+            <h3>${integration.name}</h3>
+            <p>${integration.description || ''}</p>
+            <dl class="metadata">
+                <dt>Pattern:</dt><dd>${integration.pattern}</dd>
+                <dt>Source:</dt><dd>${integrationData.systems[integration.source.system]?.name || 'N/A'}</dd>
+                <dt>Target:</dt><dd>${integrationData.systems[integration.target.system]?.name || 'N/A'}</dd>
+                <dt>Format:</dt><dd>${integration.source.format || 'N/A'} → ${integration.target.format || 'N/A'}</dd>
+            </dl>
+        </div>
+    `).join('')}
+
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 0.875rem;">
+        Generated by BAC4 Integration Modeller on ${new Date().toLocaleDateString()}
+    </footer>
+</body>
+</html>`;
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${integrationData.info.title.toLowerCase().replace(/\s+/g, '-')}-documentation.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showAlert('success', 'Documentation exported successfully!');
+        }
+
+        // Export as Markdown
+        function exportAsMarkdown() {
+            const markdown = `# ${integrationData.info.title}
+
+${integrationData.info.description || ''}
+
+## Systems (${Object.keys(integrationData.systems).length})
+
+${Object.entries(integrationData.systems).map(([id, system]) => `### ${system.name}
+
+- **Type**: ${system.type}
+- **Description**: ${system.description || 'N/A'}
+- **Owner**: ${system.owner || 'N/A'}
+- **Environment**: ${system.environment || 'N/A'}
+`).join('\n')}
+
+## Integrations (${integrationData.integrations.length})
+
+${integrationData.integrations.map(integration => `### ${integration.name}
+
+${integration.description || ''}
+
+- **Pattern**: ${integration.pattern}
+- **Source**: ${integrationData.systems[integration.source.system]?.name || 'N/A'}
+- **Target**: ${integrationData.systems[integration.target.system]?.name || 'N/A'}
+- **Format**: ${integration.source.format || 'N/A'} → ${integration.target.format || 'N/A'}
+`).join('\n')}
+
+---
+*Generated by BAC4 Integration Modeller on ${new Date().toLocaleDateString()}*
+`;
+
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${integrationData.info.title.toLowerCase().replace(/\s+/g, '-')}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showAlert('success', 'Markdown exported successfully!');
+        }
+
+        // Cost Estimator
+        function showCostEstimator() {
+            document.getElementById('costEstimatorModal').classList.add('active');
+            calculateCosts();
+        }
+
+        function calculateCosts() {
+            const costItems = [];
+            let total = 0;
+
+            const patternCosts = {
+                'rest-api': 50, 'soap-api': 50, 'graphql': 75, 'grpc': 75, 'websocket': 100,
+                'event-stream': 200, 'messaging': 150, 'file-transfer': 75, 'batch': 100,
+                'database-sync': 150, 'edi': 200, 'webhook': 25, 'custom': 100
+            };
+
+            integrationData.integrations.forEach(integration => {
+                const cost = patternCosts[integration.pattern] || 100;
+                total += cost;
+                costItems.push({ name: integration.name, category: integration.pattern, cost });
+            });
+
+            const systemCount = Object.keys(integrationData.systems).length;
+            const systemCost = systemCount * 150;
+            total += systemCost;
+            costItems.push({ name: 'System Hosting & Infrastructure', category: `${systemCount} systems`, cost: systemCost });
+
+            const monitoringCost = 100;
+            total += monitoringCost;
+            costItems.push({ name: 'Monitoring & Logging', category: 'operational', cost: monitoringCost });
+
+            document.getElementById('costItems').innerHTML = costItems.map(item => `
+                <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+                    <div>
+                        <div style="font-weight: 600;">${item.name}</div>
+                        <div style="font-size: 0.875rem; color: var(--text-secondary);">${item.category}</div>
+                    </div>
+                    <div style="font-weight: 700; color: var(--purple);">$${item.cost.toFixed(2)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('totalCost').textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Compliance Checker
+        function showComplianceChecker() {
+            document.getElementById('complianceCheckerModal').classList.add('active');
+            runComplianceCheck();
+        }
+
+        function runComplianceCheck() {
+            const results = [];
+
+            integrationData.integrations.forEach(integration => {
+                const hasSSL = integration.source.protocol === 'https' || integration.target.protocol === 'https';
+                results.push({
+                    category: 'Security', check: `${integration.name} - Data Encryption`,
+                    status: hasSSL ? 'pass' : 'fail',
+                    message: hasSSL ? 'Uses secure HTTPS protocol' : 'Not using secure protocol (HTTPS recommended)',
+                    severity: hasSSL ? 'info' : 'high'
+                });
+
+                const hasErrorHandling = integration.errorHandling && integration.errorHandling.retry;
+                results.push({
+                    category: 'Reliability', check: `${integration.name} - Error Handling`,
+                    status: hasErrorHandling ? 'pass' : 'warning',
+                    message: hasErrorHandling ? 'Error handling configured' : 'No error handling configured',
+                    severity: hasErrorHandling ? 'info' : 'medium'
+                });
+
+                const hasAuth = integration.security && integration.security.length > 0;
+                results.push({
+                    category: 'Security', check: `${integration.name} - Authentication`,
+                    status: hasAuth ? 'pass' : 'fail',
+                    message: hasAuth ? 'Authentication configured' : 'No authentication configured',
+                    severity: hasAuth ? 'info' : 'high'
+                });
+            });
+
+            const hasMonitoring = integrationData.integrations.some(i => i.errorHandling?.alerting?.enabled);
+            results.push({
+                category: 'Observability', check: 'Monitoring & Alerting',
+                status: hasMonitoring ? 'pass' : 'warning',
+                message: hasMonitoring ? 'Monitoring configured for some integrations' : 'No monitoring configured',
+                severity: hasMonitoring ? 'info' : 'medium'
+            });
+
+            const passCount = results.filter(r => r.status === 'pass').length;
+            const failCount = results.filter(r => r.status === 'fail').length;
+            const warnCount = results.filter(r => r.status === 'warning').length;
+
+            document.getElementById('complianceResults').innerHTML = `
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="flex: 1; background: #dcfce7; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #16a34a;">${passCount}</div>
+                        <div style="font-size: 0.875rem; color: #15803d;">Passed</div>
+                    </div>
+                    <div style="flex: 1; background: #fef3c7; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #d97706;">${warnCount}</div>
+                        <div style="font-size: 0.875rem; color: #b45309;">Warnings</div>
+                    </div>
+                    <div style="flex: 1; background: #fee2e2; padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 700; color: #dc2626;">${failCount}</div>
+                        <div style="font-size: 0.875rem; color: #b91c1c;">Failed</div>
+                    </div>
+                </div>
+
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${results.map(result => `
+                        <div style="background: ${result.status === 'pass' ? '#f0fdf4' : result.status === 'fail' ? '#fef2f2' : '#fef9c3'};
+                                    padding: 1rem; margin-bottom: 0.75rem; border-radius: 0.5rem;
+                                    border-left: 4px solid ${result.status === 'pass' ? '#16a34a' : result.status === 'fail' ? '#dc2626' : '#d97706'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                <div>
+                                    <span style="font-weight: 600; font-size: 0.875rem; color: #64748b;">${result.category}</span>
+                                    <div style="font-weight: 700; margin-top: 0.25rem;">${result.check}</div>
+                                </div>
+                                <span style="padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 700;
+                                             background: ${result.status === 'pass' ? '#16a34a' : result.status === 'fail' ? '#dc2626' : '#d97706'};
+                                             color: white;">
+                                    ${result.status.toUpperCase()}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.875rem; color: #475569;">${result.message}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function exportComplianceReport() {
+            showAlert('info', 'Compliance report export coming soon!');
+        }
+
+        // Change History
+        function showChangeHistory() {
+            document.getElementById('changeHistoryModal').classList.add('active');
+            renderChangeHistory();
+        }
+
+        function renderChangeHistory() {
+            if (history.length === 0) {
+                document.getElementById('historyTimeline').innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No history available</p>';
+                return;
+            }
+
+            const timeline = history.map((state, index) => {
+                const isActive = index === currentHistoryIndex;
+                const timeAgo = `${index === 0 ? 'Initial state' : `${history.length - index} change${history.length - index > 1 ? 's' : ''} ago`}`;
+
+                return `
+                    <div onclick="restoreHistoryState(${index})" style="
+                        padding: 1rem; margin-bottom: 0.75rem;
+                        background: ${isActive ? '#f3e8ff' : 'var(--bg-secondary)'};
+                        border-left: 4px solid ${isActive ? 'var(--purple)' : 'var(--border)'};
+                        border-radius: 0.5rem; cursor: pointer; transition: all 0.2s;
+                    " onmouseover="this.style.background='#f3e8ff'" onmouseout="this.style.background='${isActive ? '#f3e8ff' : 'var(--bg-secondary)'}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 700;">Version ${history.length - index}</div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">${timeAgo}</div>
+                                <div style="font-size: 0.875rem; margin-top: 0.25rem;">
+                                    ${state.systems ? Object.keys(state.systems).length : 0} systems,
+                                    ${state.integrations ? state.integrations.length : 0} integrations
+                                </div>
+                            </div>
+                            ${isActive ? '<span style="color: var(--purple); font-weight: 700;">● Current</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).reverse().join('');
+
+            document.getElementById('historyTimeline').innerHTML = timeline;
+        }
+
+        function restoreHistoryState(index) {
+            if (index >= 0 && index < history.length) {
+                currentHistoryIndex = index;
+                integrationData = JSON.parse(JSON.stringify(history[index]));
+                loadIntegrationData(integrationData);
+                renderChangeHistory();
+                showAlert('success', `Restored to version ${history.length - index}`);
+                closeModal('changeHistoryModal');
+            }
+        }
+
+        // Comments & Annotations
+        let canvasComments = [];
+
+        function addCommentToCanvas() {
+            const comment = prompt('Enter your comment or annotation:');
+            if (!comment) return;
+
+            const x = window.innerWidth / 2 - 200;
+            const y = window.innerHeight / 2 - 100;
+
+            canvasComments.push({
+                id: 'comment-' + Date.now(),
+                text: comment,
+                x: x,
+                y: y,
+                timestamp: new Date().toISOString()
+            });
+
+            renderCanvasComments();
+            showAlert('success', 'Comment added to canvas');
+        }
+
+        function renderCanvasComments() {
+            document.querySelectorAll('.canvas-comment').forEach(el => el.remove());
+
+            canvasComments.forEach(comment => {
+                const commentEl = document.createElement('div');
+                commentEl.className = 'canvas-comment';
+                commentEl.style.cssText = `
+                    position: absolute; left: ${comment.x}px; top: ${comment.y}px;
+                    background: #fef3c7; border: 2px solid #f59e0b; border-radius: 0.5rem;
+                    padding: 0.75rem; max-width: 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    cursor: move; z-index: 50;
+                `;
+                commentEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <span style="font-size: 0.75rem; color: #92400e;">💬 Comment</span>
+                        <button onclick="deleteComment('${comment.id}')" style="background: none; border: none; cursor: pointer; color: #dc2626;">✕</button>
+                    </div>
+                    <div style="font-size: 0.875rem; word-wrap: break-word;">${comment.text}</div>
+                `;
+
+                let isDragging = false, startX, startY;
+                commentEl.addEventListener('mousedown', (e) => {
+                    if (e.target.tagName === 'BUTTON') return;
+                    isDragging = true;
+                    startX = e.clientX - comment.x;
+                    startY = e.clientY - comment.y;
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (isDragging) {
+                        comment.x = e.clientX - startX;
+                        comment.y = e.clientY - startY;
+                        commentEl.style.left = comment.x + 'px';
+                        commentEl.style.top = comment.y + 'px';
+                    }
+                });
+
+                document.addEventListener('mouseup', () => { isDragging = false; });
+
+                document.getElementById('canvas').appendChild(commentEl);
+            });
+        }
+
+        function deleteComment(commentId) {
+            canvasComments = canvasComments.filter(c => c.id !== commentId);
+            renderCanvasComments();
+        }
+
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             renderMiniMap();
+            renderCanvasComments();
         });
     </script>
 </body>
