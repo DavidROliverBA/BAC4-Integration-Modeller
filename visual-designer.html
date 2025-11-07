@@ -2727,6 +2727,407 @@
             saveHistory();
         }
 
+        // ============ PHASE 2: Transformation Builder ============
+        function getTransformationBuilder(node) {
+            const transformations = node.data.transformations || [];
+
+            return `
+                <div class="form-section">
+                    <div class="form-section-title">🔄 Data Transformation</div>
+                    <div class="form-help" style="margin-bottom: 1rem;">Define field mappings and transformations between source and target formats.</div>
+
+                    <div id="transformationsList-${node.id}" style="margin-bottom: 0.75rem;">
+                        ${transformations.map((t, idx) => `
+                            <div class="transformation-item" data-index="${idx}" style="background: var(--bg-secondary); padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 0.5rem; border: 1px solid var(--border);">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                    <span style="font-weight: 600; font-size: 0.875rem;">${t.sourceField || 'New Mapping'} → ${t.targetField || 'target'}</span>
+                                    <button onclick="deleteTransformation('${node.id}', ${idx})" style="background: none; border: none; cursor: pointer; color: var(--danger);" title="Delete">✕</button>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem;">
+                                    <div>
+                                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Source Field</label>
+                                        <input type="text" value="${t.sourceField || ''}" onchange="updateTransformation('${node.id}', ${idx}, 'sourceField', this.value)" placeholder="source.field.path" style="width: 100%; padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.25rem;">
+                                    </div>
+                                    <div>
+                                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Target Field</label>
+                                        <input type="text" value="${t.targetField || ''}" onchange="updateTransformation('${node.id}', ${idx}, 'targetField', this.value)" placeholder="target.field.path" style="width: 100%; padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.25rem;">
+                                    </div>
+                                    <div>
+                                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Transformation</label>
+                                        <select onchange="updateTransformation('${node.id}', ${idx}, 'type', this.value)" style="width: 100%; padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.25rem;">
+                                            <option value="direct" ${t.type === 'direct' ? 'selected' : ''}>Direct (1:1)</option>
+                                            <option value="concat" ${t.type === 'concat' ? 'selected' : ''}>Concatenate</option>
+                                            <option value="split" ${t.type === 'split' ? 'selected' : ''}>Split</option>
+                                            <option value="format" ${t.type === 'format' ? 'selected' : ''}>Format</option>
+                                            <option value="convert" ${t.type === 'convert' ? 'selected' : ''}>Type Convert</option>
+                                            <option value="lookup" ${t.type === 'lookup' ? 'selected' : ''}>Lookup Table</option>
+                                            <option value="custom" ${t.type === 'custom' ? 'selected' : ''}>Custom Expression</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Expression</label>
+                                        <input type="text" value="${t.expression || ''}" onchange="updateTransformation('${node.id}', ${idx}, 'expression', this.value)" placeholder="transformation logic" style="width: 100%; padding: 0.25rem; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.25rem;">
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="addTransformation('${node.id}')" style="width: 100%; font-size: 0.875rem;">
+                        ➕ Add Field Mapping
+                    </button>
+                </div>
+            `;
+        }
+
+        function addTransformation(nodeId) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.transformations) {
+                node.data.transformations = [];
+            }
+
+            node.data.transformations.push({
+                sourceField: '',
+                targetField: '',
+                type: 'direct',
+                expression: ''
+            });
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                integration.transformations = node.data.transformations;
+            }
+
+            showProperties(node);
+            saveHistory();
+        }
+
+        function updateTransformation(nodeId, index, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.transformations || !node.data.transformations[index]) return;
+
+            node.data.transformations[index][field] = value;
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                integration.transformations = node.data.transformations;
+            }
+
+            saveHistory();
+        }
+
+        function deleteTransformation(nodeId, index) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.transformations) return;
+
+            node.data.transformations.splice(index, 1);
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                integration.transformations = node.data.transformations;
+            }
+
+            showProperties(node);
+            saveHistory();
+        }
+
+        // ============ PHASE 2: Schema Editor ============
+        function getSchemaEditor(node) {
+            const sourceSchema = node.data.schemas?.source || '';
+            const targetSchema = node.data.schemas?.target || '';
+            const sourceFormat = node.data.source?.format || 'json';
+            const targetFormat = node.data.target?.format || 'json';
+
+            return `
+                <div class="form-section">
+                    <div class="form-section-title">📋 Schema Definition</div>
+                    <div class="form-help" style="margin-bottom: 1rem;">Define data schemas for validation and documentation.</div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Source Schema (${sourceFormat.toUpperCase()})</label>
+                        <textarea id="sourceSchema-${node.id}" onchange="updateSchema('${node.id}', 'source', this.value)" placeholder="Paste ${sourceFormat.toUpperCase()} schema here..." style="width: 100%; min-height: 120px; padding: 0.5rem; font-family: monospace; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem;">${sourceSchema}</textarea>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="validateSchema('${node.id}', 'source', '${sourceFormat}')" style="font-size: 0.75rem;">✓ Validate</button>
+                            <button class="btn btn-secondary" onclick="generateSampleData('${node.id}', 'source')" style="font-size: 0.75rem;">📄 Generate Sample</button>
+                            <button class="btn btn-secondary" onclick="clearSchema('${node.id}', 'source')" style="font-size: 0.75rem;">✕ Clear</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Target Schema (${targetFormat.toUpperCase()})</label>
+                        <textarea id="targetSchema-${node.id}" onchange="updateSchema('${node.id}', 'target', this.value)" placeholder="Paste ${targetFormat.toUpperCase()} schema here..." style="width: 100%; min-height: 120px; padding: 0.5rem; font-family: monospace; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem;">${targetSchema}</textarea>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="validateSchema('${node.id}', 'target', '${targetFormat}')" style="font-size: 0.75rem;">✓ Validate</button>
+                            <button class="btn btn-secondary" onclick="generateSampleData('${node.id}', 'target')" style="font-size: 0.75rem;">📄 Generate Sample</button>
+                            <button class="btn btn-secondary" onclick="clearSchema('${node.id}', 'target')" style="font-size: 0.75rem;">✕ Clear</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSchema(nodeId, schemaType, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.schemas) {
+                node.data.schemas = {};
+            }
+            node.data.schemas[schemaType] = value;
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                if (!integration.schemas) {
+                    integration.schemas = {};
+                }
+                integration.schemas[schemaType] = value;
+            }
+
+            saveHistory();
+        }
+
+        function validateSchema(nodeId, schemaType, format) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const schema = node.data.schemas?.[schemaType];
+            if (!schema || !schema.trim()) {
+                showAlert('warning', 'No schema to validate');
+                return;
+            }
+
+            try {
+                if (format === 'json' || format === 'avro') {
+                    JSON.parse(schema);
+                    showAlert('success', `${schemaType} schema is valid ${format.toUpperCase()}`);
+                } else if (format === 'xml') {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(schema, 'text/xml');
+                    const parseError = xmlDoc.querySelector('parsererror');
+                    if (parseError) {
+                        throw new Error('Invalid XML');
+                    }
+                    showAlert('success', `${schemaType} schema is valid XML`);
+                } else {
+                    showAlert('info', `Schema validation not implemented for ${format}`);
+                }
+            } catch (e) {
+                showAlert('error', `Invalid ${format.toUpperCase()} schema: ${e.message}`);
+            }
+        }
+
+        function generateSampleData(nodeId, schemaType) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const schema = node.data.schemas?.[schemaType];
+            if (!schema || !schema.trim()) {
+                showAlert('warning', 'Define a schema first to generate sample data');
+                return;
+            }
+
+            const format = schemaType === 'source' ? node.data.source?.format : node.data.target?.format;
+
+            try {
+                if (format === 'json') {
+                    const schemaObj = JSON.parse(schema);
+                    const sample = generateJSONSample(schemaObj);
+                    console.log('Sample Data:', JSON.stringify(sample, null, 2));
+                    showAlert('success', 'Sample data generated (check console)');
+                } else {
+                    showAlert('info', `Sample generation not implemented for ${format}`);
+                }
+            } catch (e) {
+                showAlert('error', `Error generating sample: ${e.message}`);
+            }
+        }
+
+        function generateJSONSample(schema) {
+            if (schema.type === 'object' && schema.properties) {
+                const sample = {};
+                for (const [key, value] of Object.entries(schema.properties)) {
+                    sample[key] = generateJSONSample(value);
+                }
+                return sample;
+            } else if (schema.type === 'array' && schema.items) {
+                return [generateJSONSample(schema.items)];
+            } else if (schema.type === 'string') {
+                return schema.example || 'string';
+            } else if (schema.type === 'number' || schema.type === 'integer') {
+                return schema.example || 0;
+            } else if (schema.type === 'boolean') {
+                return false;
+            }
+            return null;
+        }
+
+        function clearSchema(nodeId, schemaType) {
+            const textarea = document.getElementById(`${schemaType}Schema-${nodeId}`);
+            if (textarea) {
+                textarea.value = '';
+                updateSchema(nodeId, schemaType, '');
+            }
+        }
+
+        // ============ PHASE 2: Connection Testing & Preview ============
+        function getConnectionTesting(node) {
+            return `
+                <div class="form-section">
+                    <div class="form-section-title">🔌 Connection Testing</div>
+                    <div class="form-help" style="margin-bottom: 1rem;">Test connectivity and preview data transformation results.</div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" onclick="testConnection('${node.id}', 'source')" style="font-size: 0.875rem;">
+                            🔗 Test Source
+                        </button>
+                        <button class="btn btn-primary" onclick="testConnection('${node.id}', 'target')" style="font-size: 0.875rem;">
+                            🔗 Test Target
+                        </button>
+                    </div>
+
+                    <div id="connectionTestResult-${node.id}" style="display: none; padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 1rem; font-size: 0.75rem;"></div>
+
+                    <div style="margin-top: 1rem;">
+                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Sample Input Data</label>
+                        <textarea id="sampleInput-${node.id}" placeholder='{"field1": "value1", "field2": "value2"}' style="width: 100%; min-height: 100px; padding: 0.5rem; font-family: monospace; font-size: 0.75rem; border: 1px solid var(--border); border-radius: 0.375rem;"></textarea>
+                        <button class="btn btn-secondary" onclick="previewTransformation('${node.id}')" style="width: 100%; margin-top: 0.5rem; font-size: 0.875rem;">
+                            🔄 Preview Transformation
+                        </button>
+                    </div>
+
+                    <div id="transformationPreview-${node.id}" style="display: none; margin-top: 1rem;">
+                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Transformed Output</label>
+                        <pre id="transformationOutput-${node.id}" style="background: var(--bg-secondary); padding: 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; overflow-x: auto; border: 1px solid var(--border);"></pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function testConnection(nodeId, endpoint) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const resultDiv = document.getElementById(`connectionTestResult-${nodeId}`);
+            if (!resultDiv) return;
+
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = 'var(--bg-secondary)';
+            resultDiv.style.color = 'var(--text-primary)';
+            resultDiv.style.border = '1px solid var(--border)';
+            resultDiv.innerHTML = `⏳ Testing ${endpoint} connection...`;
+
+            // Simulate connection test (in real implementation, this would make actual API calls)
+            setTimeout(() => {
+                const connectionUrl = node.data[endpoint]?.connection?.url;
+
+                if (!connectionUrl) {
+                    resultDiv.style.background = 'rgba(251, 191, 36, 0.1)';
+                    resultDiv.style.color = 'var(--warning)';
+                    resultDiv.style.border = '1px solid var(--warning)';
+                    resultDiv.innerHTML = `⚠️ No ${endpoint} URL configured`;
+                    return;
+                }
+
+                // Simulate success
+                const success = Math.random() > 0.3; // 70% success rate for demo
+
+                if (success) {
+                    resultDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+                    resultDiv.style.color = 'var(--success)';
+                    resultDiv.style.border = '1px solid var(--success)';
+                    resultDiv.innerHTML = `✅ ${endpoint} connection successful<br><small style="opacity: 0.8;">Connected to: ${connectionUrl}</small>`;
+                } else {
+                    resultDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+                    resultDiv.style.color = 'var(--danger)';
+                    resultDiv.style.border = '1px solid var(--danger)';
+                    resultDiv.innerHTML = `❌ ${endpoint} connection failed<br><small style="opacity: 0.8;">Could not reach: ${connectionUrl}</small>`;
+                }
+            }, 1500);
+        }
+
+        function previewTransformation(nodeId) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            const sampleInputEl = document.getElementById(`sampleInput-${nodeId}`);
+            const previewDiv = document.getElementById(`transformationPreview-${nodeId}`);
+            const outputEl = document.getElementById(`transformationOutput-${nodeId}`);
+
+            if (!sampleInputEl || !previewDiv || !outputEl) return;
+
+            const sampleInput = sampleInputEl.value.trim();
+            if (!sampleInput) {
+                showAlert('warning', 'Enter sample input data to preview transformation');
+                return;
+            }
+
+            try {
+                const inputData = JSON.parse(sampleInput);
+                const transformations = node.data.transformations || [];
+
+                if (transformations.length === 0) {
+                    showAlert('info', 'No transformations defined. Add field mappings first.');
+                    return;
+                }
+
+                // Apply transformations
+                const outputData = {};
+                transformations.forEach(t => {
+                    if (t.sourceField && t.targetField) {
+                        const sourceValue = getNestedValue(inputData, t.sourceField);
+                        setNestedValue(outputData, t.targetField, applyTransformationType(sourceValue, t.type, t.expression));
+                    }
+                });
+
+                previewDiv.style.display = 'block';
+                outputEl.textContent = JSON.stringify(outputData, null, 2);
+                showAlert('success', 'Transformation preview generated');
+            } catch (e) {
+                showAlert('error', `Error previewing transformation: ${e.message}`);
+            }
+        }
+
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => current?.[key], obj);
+        }
+
+        function setNestedValue(obj, path, value) {
+            const keys = path.split('.');
+            const lastKey = keys.pop();
+            const target = keys.reduce((current, key) => {
+                if (!current[key]) current[key] = {};
+                return current[key];
+            }, obj);
+            target[lastKey] = value;
+        }
+
+        function applyTransformationType(value, type, expression) {
+            switch(type) {
+                case 'direct':
+                    return value;
+                case 'concat':
+                    return expression ? `${value}${expression}` : value;
+                case 'format':
+                    return expression ? expression.replace('{}', value) : value;
+                case 'convert':
+                    if (expression === 'string') return String(value);
+                    if (expression === 'number') return Number(value);
+                    if (expression === 'boolean') return Boolean(value);
+                    return value;
+                case 'custom':
+                    // In real implementation, evaluate expression safely
+                    return value;
+                default:
+                    return value;
+            }
+        }
+
         function showProperties(node) {
             const panel = document.getElementById('propertiesPanel');
 
@@ -2994,6 +3395,12 @@
                     </div>
 
                     ${getPatternSpecificConfig(node)}
+
+                    ${getTransformationBuilder(node)}
+
+                    ${getSchemaEditor(node)}
+
+                    ${getConnectionTesting(node)}
 
                     <div class="form-section">
                         <div class="form-section-title">Metadata</div>
@@ -3652,24 +4059,26 @@
             saveHistory();
         }
 
-        function loadExample(exampleType) {
-            const examples = {
-                'rest-api': 'examples/rest-api-integration.json',
-                'kafka': 'examples/kafka-event-stream.json',
-                'file-transfer': 'examples/file-transfer-batch.json'
-            };
+        // ============ Embedded Example Data (fixes CORS issues) ============
+        const embeddedExamples = {
+            'rest-api': {"version":"1.0.0","info":{"title":"Customer Data Integration","version":"1.0.0","description":"REST API integration between CRM and ERP systems","contact":{"name":"Integration Team","email":"integration@example.com"},"tags":["customer","crm","erp"]},"systems":{"salesforce-crm":{"name":"Salesforce CRM","type":"external","description":"Customer Relationship Management system","version":"v52.0","owner":"Sales Team","environment":"production"},"sap-erp":{"name":"SAP ERP","type":"application","description":"Enterprise Resource Planning system","version":"S/4HANA 2021","owner":"IT Team","environment":"production"}},"integrations":[{"id":"crm-to-erp-customer-sync","name":"Customer Sync from CRM to ERP","description":"Synchronize customer data from Salesforce to SAP ERP when customer is created or updated","pattern":"rest-api","source":{"system":"salesforce-crm","protocol":"https","connection":{"url":"https://api.salesforce.com/services/data/v52.0"},"format":"json","schema":"CustomerSchema"},"target":{"system":"sap-erp","protocol":"https","connection":{"url":"https://erp.example.com/api/v1"},"format":"json","schema":"ERPCustomerSchema"},"trigger":{"type":"webhook","webhook":{"path":"/webhooks/salesforce/customer","method":"POST"}},"transformation":{"type":"mapping","mapping":{"customer_id":"$.Id","name":"$.Name","email":"$.Email","phone":"$.Phone","address":{"street":"$.BillingStreet","city":"$.BillingCity","state":"$.BillingState","zip":"$.BillingPostalCode","country":"$.BillingCountry"},"status":"$.Status","created_date":"$.CreatedDate"}},"errorHandling":{"retry":{"maxAttempts":3,"backoff":"exponential","delay":"2s","maxDelay":"30s"},"deadLetterQueue":{"enabled":true,"endpoint":{"system":"error-queue","protocol":"kafka","connection":{"topic":"integration-errors"}}},"alerting":{"enabled":true,"channels":["email","slack"],"recipients":["integration-team@example.com","#integration-alerts"]}},"security":[{"oauth2":["read:customers","write:customers"]}],"metadata":{"sla":{"latency":"5s","throughput":"100/min","availability":"99.9%"},"owner":"Integration Team","tags":["critical","real-time"],"documentation":"https://wiki.example.com/integrations/crm-erp-sync"},"config":{"method":"POST","path":"/customers","headers":{"Content-Type":"application/json","X-Integration-Source":"salesforce"},"requestBody":{"contentType":"application/json","schema":{"$ref":"#/components/schemas/ERPCustomerSchema"}},"responseExpected":{"statusCode":201,"schema":{"$ref":"#/components/schemas/ERPCustomerResponse"}},"timeout":"30s"}}],"components":{"schemas":{"CustomerSchema":{"type":"object","properties":{"Id":{"type":"string"},"Name":{"type":"string"},"Email":{"type":"string","format":"email"},"Phone":{"type":"string"},"BillingStreet":{"type":"string"},"BillingCity":{"type":"string"},"BillingState":{"type":"string"},"BillingPostalCode":{"type":"string"},"BillingCountry":{"type":"string"},"Status":{"type":"string"},"CreatedDate":{"type":"string","format":"date-time"}}},"ERPCustomerSchema":{"type":"object","required":["customer_id","name"],"properties":{"customer_id":{"type":"string"},"name":{"type":"string"},"email":{"type":"string","format":"email"},"phone":{"type":"string"},"address":{"type":"object","properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"zip":{"type":"string"},"country":{"type":"string"}}},"status":{"type":"string"},"created_date":{"type":"string","format":"date-time"}}},"ERPCustomerResponse":{"type":"object","properties":{"id":{"type":"string"},"message":{"type":"string"},"timestamp":{"type":"string","format":"date-time"}}}},"securitySchemes":{"oauth2":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://login.salesforce.com/services/oauth2/token","scopes":{"read:customers":"Read customer data","write:customers":"Write customer data"}}}}}}},
 
-            const examplePath = examples[exampleType];
-            if (examplePath) {
-                fetch(examplePath)
-                    .then(response => response.json())
-                    .then(data => {
-                        loadIntegrationData(data);
-                        showAlert('success', 'Example loaded successfully!');
-                    })
-                    .catch(error => {
-                        showAlert('error', 'Failed to load example: ' + error.message);
-                    });
+            'kafka': {"version":"1.0.0","info":{"title":"Order Event Processing","version":"1.0.0","description":"Real-time order event streaming from e-commerce platform to fulfillment system via Kafka","tags":["orders","kafka","event-driven"]},"systems":{"ecommerce-platform":{"name":"E-Commerce Platform","type":"application","description":"Online shopping platform","owner":"E-Commerce Team","environment":"production"},"fulfillment-system":{"name":"Order Fulfillment System","type":"application","description":"Warehouse and fulfillment management","owner":"Operations Team","environment":"production"},"kafka-cluster":{"name":"Apache Kafka Cluster","type":"service","description":"Event streaming platform","owner":"Platform Team","environment":"production"}},"integrations":[{"id":"order-event-stream","name":"Order Events Stream","description":"Stream order events from e-commerce to fulfillment system","pattern":"event-stream","source":{"system":"ecommerce-platform","protocol":"kafka","connection":{"host":"kafka.example.com","port":9092,"topic":"orders.events"},"format":"json","schema":"OrderEventSchema"},"target":{"system":"fulfillment-system","protocol":"kafka","connection":{"host":"kafka.example.com","port":9092,"topic":"fulfillment.orders"},"format":"json","schema":"FulfillmentOrderSchema"},"trigger":{"type":"event","event":{"source":"com.example.ecommerce","type":"order.created","filter":{"status":["confirmed","paid"]}}},"transformation":{"type":"mapping","mapping":{"order_id":"$.data.orderId","customer_id":"$.data.customerId","items":"$.data.items[*].{sku: sku, quantity: quantity, price: price}","shipping_address":"$.data.shippingAddress","total_amount":"$.data.totalAmount","order_date":"$.time","priority":"$.data.shippingMethod == 'express' ? 'high' : 'normal'"}},"errorHandling":{"retry":{"maxAttempts":5,"backoff":"exponential","delay":"1s","maxDelay":"60s"},"deadLetterQueue":{"enabled":true,"endpoint":{"system":"kafka-cluster","protocol":"kafka","connection":{"topic":"orders.dlq"}}},"alerting":{"enabled":true,"channels":["pagerduty","slack"],"recipients":["#operations-alerts"]}},"metadata":{"sla":{"latency":"100ms","throughput":"5000/sec","availability":"99.95%"},"owner":"Integration Team","tags":["critical","real-time","orders"]},"config":{"provider":"kafka","topic":"orders.events","partitions":10,"replicationFactor":3,"consumerGroup":"fulfillment-order-processor","offsetReset":"earliest","enableAutoCommit":false,"maxPollRecords":500,"compression":"snappy","idempotence":true,"cloudEvents":true}},{"id":"order-status-updates","name":"Order Status Update Stream","description":"Stream fulfillment status updates back to e-commerce platform","pattern":"event-stream","source":{"system":"fulfillment-system","protocol":"kafka","connection":{"topic":"fulfillment.status"},"format":"json"},"target":{"system":"ecommerce-platform","protocol":"kafka","connection":{"topic":"orders.status"},"format":"json"},"trigger":{"type":"event","event":{"source":"com.example.fulfillment","type":"order.status.changed"}},"transformation":{"type":"template","templateEngine":"jsonata","template":"{ \"orderId\": data.orderId, \"status\": data.status, \"timestamp\": $now(), \"location\": data.warehouseLocation }"},"errorHandling":{"retry":{"maxAttempts":3,"backoff":"fixed","delay":"5s"}},"metadata":{"sla":{"latency":"500ms","throughput":"2000/sec"},"tags":["status-updates","real-time"]},"config":{"provider":"kafka","topic":"fulfillment.status","consumerGroup":"ecommerce-status-updater","offsetReset":"latest","enableAutoCommit":true,"cloudEvents":true}}],"components":{"schemas":{"OrderEventSchema":{"type":"object","required":["specversion","type","source","id","time","data"],"properties":{"specversion":{"type":"string","const":"1.0"},"type":{"type":"string"},"source":{"type":"string","format":"uri"},"id":{"type":"string"},"time":{"type":"string","format":"date-time"},"datacontenttype":{"type":"string"},"data":{"type":"object","properties":{"orderId":{"type":"string"},"customerId":{"type":"string"},"items":{"type":"array","items":{"type":"object","properties":{"sku":{"type":"string"},"name":{"type":"string"},"quantity":{"type":"integer"},"price":{"type":"number"}}}},"totalAmount":{"type":"number"},"shippingAddress":{"type":"object","properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"zip":{"type":"string"},"country":{"type":"string"}}},"shippingMethod":{"type":"string","enum":["standard","express","overnight"]},"status":{"type":"string"}}}}},"FulfillmentOrderSchema":{"type":"object","required":["order_id","items"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"},"items":{"type":"array","items":{"type":"object","properties":{"sku":{"type":"string"},"quantity":{"type":"integer"},"price":{"type":"number"}}}},"shipping_address":{"type":"object"},"total_amount":{"type":"number"},"order_date":{"type":"string","format":"date-time"},"priority":{"type":"string","enum":["low","normal","high","urgent"]}}}}}},
+
+            'file-transfer': {"version":"1.0.0","info":{"title":"Daily Sales Report Integration","version":"1.0.0","description":"Batch file transfer of daily sales reports from POS systems to data warehouse","tags":["batch","file-transfer","reporting"]},"systems":{"pos-system":{"name":"Point of Sale System","type":"application","description":"Retail POS system","owner":"Retail Operations","environment":"production"},"data-warehouse":{"name":"Enterprise Data Warehouse","type":"database","description":"Central data warehouse for analytics","owner":"Data Team","environment":"production"},"sftp-server":{"name":"Secure File Transfer Server","type":"service","description":"SFTP server for file exchange","owner":"Infrastructure Team","environment":"production"}},"integrations":[{"id":"daily-sales-file-transfer","name":"Daily Sales File Transfer","description":"Transfer daily sales CSV files from SFTP to data warehouse","pattern":"file-transfer","source":{"system":"sftp-server","protocol":"sftp","connection":{"host":"sftp.example.com","port":22,"path":"/exports/sales"},"format":"csv"},"target":{"system":"data-warehouse","protocol":"jdbc","connection":{"url":"jdbc:postgresql://dwh.example.com:5432/analytics","database":"analytics"},"format":"csv"},"trigger":{"type":"schedule","schedule":{"cron":"0 2 * * *","timezone":"America/New_York"}},"transformation":{"type":"mapping","mapping":{"transaction_id":"$.TransactionID","store_id":"$.StoreID","pos_terminal":"$.Terminal","timestamp":"$.Timestamp","items":"$.Items","subtotal":"$.Subtotal","tax":"$.Tax","total":"$.Total","payment_method":"$.PaymentMethod"}},"errorHandling":{"retry":{"maxAttempts":3,"backoff":"linear","delay":"10m"},"alerting":{"enabled":true,"channels":["email"],"recipients":["data-team@example.com"]},"fallback":{"enabled":true,"action":"skip"}},"metadata":{"sla":{"latency":"1h","throughput":"1GB/hour","availability":"99.5%"},"owner":"Data Integration Team","tags":["batch","daily","sales"]},"config":{"protocol":"sftp","directory":"/exports/sales","filePattern":"sales_*.csv","polling":{"enabled":true,"interval":"5m"},"compression":{"enabled":true,"format":"gzip"},"encryption":{"enabled":false},"archiving":{"enabled":true,"directory":"/archives/sales","retention":"365d"},"fileProcessing":{"moveAfterProcessing":true,"deleteAfterProcessing":false,"targetDirectory":"/processed"}}},{"id":"sales-data-batch-load","name":"Sales Data Batch Load","description":"Batch load sales data into data warehouse tables","pattern":"batch","source":{"system":"sftp-server","format":"csv"},"target":{"system":"data-warehouse","protocol":"jdbc","connection":{"database":"analytics"}},"trigger":{"type":"file-arrival"},"transformation":{"type":"script","script":{"language":"python","file":"transformations/sales_transform.py"}},"errorHandling":{"retry":{"maxAttempts":2,"backoff":"fixed","delay":"30m"}},"metadata":{"tags":["etl","batch-load"]},"config":{"chunkSize":10000,"parallelism":4,"ordering":"preserve","checkpointing":{"enabled":true,"interval":"5m"},"aggregation":{"enabled":false}}}],"components":{"schemas":{"SalesRecordSchema":{"type":"object","required":["TransactionID","StoreID","Timestamp","Total"],"properties":{"TransactionID":{"type":"string"},"StoreID":{"type":"string"},"Terminal":{"type":"string"},"Timestamp":{"type":"string","format":"date-time"},"Items":{"type":"string"},"Subtotal":{"type":"number"},"Tax":{"type":"number"},"Total":{"type":"number"},"PaymentMethod":{"type":"string","enum":["cash","credit","debit","mobile"]}}}},"securitySchemes":{"ssh-key":{"type":"apiKey","name":"SSH Key","in":"header","description":"SSH key-based authentication for SFTP"}}}}
+        };
+
+        function loadExample(exampleType) {
+            const exampleData = embeddedExamples[exampleType];
+            if (exampleData) {
+                try {
+                    loadIntegrationData(exampleData);
+                    showAlert('success', `${exampleType.replace('-', ' ').toUpperCase()} example loaded successfully!`);
+                } catch (error) {
+                    showAlert('error', 'Failed to load example: ' + error.message);
+                }
+            } else {
+                showAlert('warning', 'Example not found: ' + exampleType);
             }
         }
 
