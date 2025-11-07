@@ -54,8 +54,73 @@
 
         .header-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
             align-items: center;
+        }
+
+        /* Header Search */
+        .header-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-search input {
+            padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 300px;
+            transition: all 0.2s;
+        }
+
+        .header-search input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .header-search input:focus {
+            outline: none;
+            background: white;
+            color: var(--text-primary);
+            border-color: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .header-search input:focus::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .header-search .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+        }
+
+        .header-search input:focus ~ .search-icon {
+            color: var(--text-secondary);
+        }
+
+        .header-search button {
+            position: absolute;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            display: none;
+        }
+
+        .header-search input:not(:placeholder-shown) + .search-icon + button {
+            display: block;
+        }
+
+        .header-search input:focus + .search-icon + button {
+            color: var(--text-secondary);
         }
 
         .btn {
@@ -217,42 +282,7 @@
             color: var(--text-secondary);
         }
 
-        /* Palette Search & Organization */
-        .palette-search {
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 10;
-        }
-
-        .palette-search input {
-            width: 100%;
-            padding: 0.5rem 2rem 0.5rem 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-        }
-
-        .palette-search input:focus {
-            outline: none;
-            border-color: var(--purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-        }
-
-        .palette-search button {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.25rem;
-            color: var(--text-secondary);
-        }
-
+        /* Palette Organization */
         .collapsible {
             cursor: pointer;
             user-select: none;
@@ -1156,6 +1186,12 @@
     <div class="header">
         <h1>🎨 BAC4 Integration Modeller</h1>
         <div class="header-actions">
+            <!-- Search Bar -->
+            <div class="header-search">
+                <input type="text" id="paletteSearch" placeholder="Search components..." oninput="filterPalette(this.value)">
+                <span class="search-icon">🔍</span>
+                <button onclick="clearPaletteSearch()">✕</button>
+            </div>
             <button class="btn btn-primary" onclick="openTemplates()" title="Load a template">📑 Templates</button>
             <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()" title="Load JSON file">📁 Load</button>
             <button class="btn btn-success" onclick="showExportMenu(event)" title="Export options">💾 Export ▼</button>
@@ -1201,7 +1237,6 @@
             <button class="btn btn-secondary btn-icon" onclick="toggleAlignmentGuides()" id="guidesToggle" title="Alignment guides">📏</button>
         </div>
         <div class="toolbar-group">
-            <button class="btn btn-secondary" onclick="autoLayout()" title="Auto-arrange nodes">📐 Auto Layout</button>
             <button class="btn btn-secondary" onclick="fitToView()" title="Fit to view">🔍 Fit View</button>
             <button class="btn btn-secondary" onclick="exportAsPNG()" title="Export as image">🖼️ Export PNG</button>
         </div>
@@ -1214,12 +1249,6 @@
     <div class="container">
         <!-- Left Panel: Component Palette -->
         <div class="palette">
-            <!-- Search Bar -->
-            <div class="palette-search">
-                <input type="text" id="paletteSearch" placeholder="🔍 Search components..." oninput="filterPalette(this.value)">
-                <button onclick="clearPaletteSearch()">✕</button>
-            </div>
-
             <div class="section">
                 <h3>🚀 Quick Start</h3>
                 <div class="quick-actions">
@@ -3772,37 +3801,6 @@
 
             updateZoomDisplay();
             updateCanvasTransform();
-        }
-
-        // ============ Auto Layout ============
-        function autoLayout() {
-            if (canvasNodes.length === 0) return;
-
-            const systems = canvasNodes.filter(n => n.type === 'system');
-            const integrations = canvasNodes.filter(n => n.type === 'integration');
-
-            // Position systems in a circle
-            const radius = 300;
-            const centerX = 400;
-            const centerY = 300;
-
-            systems.forEach((node, i) => {
-                const angle = (i / systems.length) * 2 * Math.PI;
-                node.x = centerX + radius * Math.cos(angle);
-                node.y = centerY + radius * Math.sin(angle);
-            });
-
-            // Position integrations in the middle
-            integrations.forEach((node, i) => {
-                const angle = (i / integrations.length) * 2 * Math.PI + Math.PI / integrations.length;
-                node.x = centerX + (radius / 2) * Math.cos(angle);
-                node.y = centerY + (radius / 2) * Math.sin(angle);
-            });
-
-            renderCanvas();
-            fitToView();
-            saveHistory();
-            showAlert('success', 'Layout optimized!');
         }
 
         // ============ History (Undo/Redo) ============
