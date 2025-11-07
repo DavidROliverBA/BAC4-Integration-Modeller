@@ -900,7 +900,8 @@
         </div>
         <div class="toolbar-group">
             <button class="btn btn-secondary" onclick="newIntegration()" title="Create new integration">+ New Integration</button>
-            <button class="btn btn-secondary" onclick="validateDesign()" title="Validate design">✅ Validate</button>
+            <button class="btn btn-secondary" onclick="showValidationResults()" title="Validate design">🔍 Validate</button>
+            <span id="validationIndicator" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: #f3f4f6; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;" onclick="showValidationResults()" title="Click to see validation details">✅ Valid</span>
         </div>
         <div class="toolbar-group">
             <button class="btn btn-secondary" onclick="autoLayout()" title="Auto-arrange nodes">📐 Auto Layout</button>
@@ -962,6 +963,111 @@
                         <div class="palette-label-desc">Legacy system</div>
                     </div>
                 </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="api-gateway">
+                    <span class="palette-icon">🚪</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">API Gateway</div>
+                        <div class="palette-label-desc">API routing</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="message-broker">
+                    <span class="palette-icon">📮</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Message Broker</div>
+                        <div class="palette-label-desc">Kafka, RabbitMQ</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="cache">
+                    <span class="palette-icon">⚡</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Cache</div>
+                        <div class="palette-label-desc">Redis, Memcached</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="file-storage">
+                    <span class="palette-icon">📦</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">File Storage</div>
+                        <div class="palette-label-desc">S3, Azure Blob</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="data-warehouse">
+                    <span class="palette-icon">🏢</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Data Warehouse</div>
+                        <div class="palette-label-desc">Snowflake, BigQuery</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="etl">
+                    <span class="palette-icon">🔀</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">ETL Tool</div>
+                        <div class="palette-label-desc">Transform data</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="container">
+                    <span class="palette-icon">🐳</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Container</div>
+                        <div class="palette-label-desc">Docker, K8s</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="serverless">
+                    <span class="palette-icon">⚙️</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Serverless</div>
+                        <div class="palette-label-desc">Lambda, Functions</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="auth">
+                    <span class="palette-icon">🔐</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Auth Service</div>
+                        <div class="palette-label-desc">OAuth, SAML</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="monitoring">
+                    <span class="palette-icon">📊</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Monitoring</div>
+                        <div class="palette-label-desc">Observability</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="cdn">
+                    <span class="palette-icon">🌍</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">CDN</div>
+                        <div class="palette-label-desc">Content delivery</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="analytics">
+                    <span class="palette-icon">📈</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Analytics</div>
+                        <div class="palette-label-desc">BI, reporting</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="crm">
+                    <span class="palette-icon">👥</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">CRM</div>
+                        <div class="palette-label-desc">Salesforce, Dynamics</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="erp">
+                    <span class="palette-icon">🏭</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">ERP</div>
+                        <div class="palette-label-desc">SAP, Oracle</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="hr">
+                    <span class="palette-icon">👔</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">HR System</div>
+                        <div class="palette-label-desc">Workday, ADP</div>
+                    </div>
+                </div>
             </div>
 
             <div class="section">
@@ -973,6 +1079,34 @@
                         <div class="palette-label-desc">HTTP/HTTPS</div>
                     </div>
                 </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="soap-api">
+                    <span class="palette-icon">🧼</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">SOAP API</div>
+                        <div class="palette-label-desc">WSDL, XML</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="graphql">
+                    <span class="palette-icon">📊</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">GraphQL</div>
+                        <div class="palette-label-desc">Query API</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="grpc">
+                    <span class="palette-icon">⚡</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">gRPC</div>
+                        <div class="palette-label-desc">RPC, Protobuf</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="websocket">
+                    <span class="palette-icon">🔗</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">WebSocket</div>
+                        <div class="palette-label-desc">Real-time</div>
+                    </div>
+                </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="event-stream">
                     <span class="palette-icon">📨</span>
                     <div class="palette-label">
@@ -980,18 +1114,18 @@
                         <div class="palette-label-desc">Kafka, Kinesis</div>
                     </div>
                 </div>
-                <div class="palette-item" draggable="true" data-type="integration" data-pattern="file-transfer">
-                    <span class="palette-icon">📁</span>
-                    <div class="palette-label">
-                        <div class="palette-label-title">File Transfer</div>
-                        <div class="palette-label-desc">FTP, SFTP</div>
-                    </div>
-                </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="messaging">
                     <span class="palette-icon">💬</span>
                     <div class="palette-label">
                         <div class="palette-label-title">Messaging</div>
                         <div class="palette-label-desc">Queue, MQ</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="file-transfer">
+                    <span class="palette-icon">📁</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">File Transfer</div>
+                        <div class="palette-label-desc">FTP, SFTP</div>
                     </div>
                 </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="batch">
@@ -1006,6 +1140,27 @@
                     <div class="palette-label">
                         <div class="palette-label-title">Database Sync</div>
                         <div class="palette-label-desc">CDC, Replication</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="edi">
+                    <span class="palette-icon">📋</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">EDI</div>
+                        <div class="palette-label-desc">X12, EDIFACT</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="webhook">
+                    <span class="palette-icon">🪝</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Webhook</div>
+                        <div class="palette-label-desc">Event callback</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="custom">
+                    <span class="palette-icon">🔧</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Custom</div>
+                        <div class="palette-label-desc">Custom logic</div>
                     </div>
                 </div>
             </div>
@@ -2047,6 +2202,21 @@
                                 <option value="service" ${node.data.type === 'service' ? 'selected' : ''}>Service</option>
                                 <option value="external" ${node.data.type === 'external' ? 'selected' : ''}>External</option>
                                 <option value="legacy" ${node.data.type === 'legacy' ? 'selected' : ''}>Legacy</option>
+                                <option value="api-gateway" ${node.data.type === 'api-gateway' ? 'selected' : ''}>API Gateway</option>
+                                <option value="message-broker" ${node.data.type === 'message-broker' ? 'selected' : ''}>Message Broker</option>
+                                <option value="cache" ${node.data.type === 'cache' ? 'selected' : ''}>Cache</option>
+                                <option value="file-storage" ${node.data.type === 'file-storage' ? 'selected' : ''}>File Storage</option>
+                                <option value="data-warehouse" ${node.data.type === 'data-warehouse' ? 'selected' : ''}>Data Warehouse</option>
+                                <option value="etl" ${node.data.type === 'etl' ? 'selected' : ''}>ETL Tool</option>
+                                <option value="container" ${node.data.type === 'container' ? 'selected' : ''}>Container</option>
+                                <option value="serverless" ${node.data.type === 'serverless' ? 'selected' : ''}>Serverless</option>
+                                <option value="auth" ${node.data.type === 'auth' ? 'selected' : ''}>Auth Service</option>
+                                <option value="monitoring" ${node.data.type === 'monitoring' ? 'selected' : ''}>Monitoring</option>
+                                <option value="cdn" ${node.data.type === 'cdn' ? 'selected' : ''}>CDN</option>
+                                <option value="analytics" ${node.data.type === 'analytics' ? 'selected' : ''}>Analytics</option>
+                                <option value="crm" ${node.data.type === 'crm' ? 'selected' : ''}>CRM</option>
+                                <option value="erp" ${node.data.type === 'erp' ? 'selected' : ''}>ERP</option>
+                                <option value="hr" ${node.data.type === 'hr' ? 'selected' : ''}>HR System</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -2174,6 +2344,107 @@
                     </div>
 
                     <div class="form-section">
+                        <div class="form-section-title">Connection Configuration</div>
+                        <div class="form-group">
+                            <label>Source URL/Endpoint</label>
+                            <input type="text" value="${node.data.source.connection?.url || ''}" onchange="updateIntegrationConnection('${node.id}', 'source', 'url', this.value)" placeholder="e.g., https://api.example.com">
+                            <div class="form-help">Connection URL or endpoint for source system</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Target URL/Endpoint</label>
+                            <input type="text" value="${node.data.target.connection?.url || ''}" onchange="updateIntegrationConnection('${node.id}', 'target', 'url', this.value)" placeholder="e.g., https://target.example.com">
+                            <div class="form-help">Connection URL or endpoint for target system</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Timeout (seconds)</label>
+                            <input type="number" value="${parseInt(node.data.config?.timeout) || 30}" onchange="updateIntegrationConfig('${node.id}', 'timeout', this.value + 's')" min="1" max="300">
+                            <div class="form-help">Request timeout in seconds</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Error Handling</div>
+                        <div class="form-group">
+                            <label>Enable Retry</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'retry.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.retry?.maxAttempts ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.retry?.maxAttempts ? 'selected' : ''}>Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Retry Attempts</label>
+                            <input type="number" value="${node.data.errorHandling?.retry?.maxAttempts || 3}" onchange="updateIntegrationErrorHandling('${node.id}', 'retry.maxAttempts', parseInt(this.value))" min="0" max="10">
+                            <div class="form-help">Number of retry attempts on failure</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Retry Strategy</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'retry.backoff', this.value)">
+                                <option value="fixed" ${node.data.errorHandling?.retry?.backoff === 'fixed' ? 'selected' : ''}>Fixed Delay</option>
+                                <option value="exponential" ${node.data.errorHandling?.retry?.backoff === 'exponential' ? 'selected' : ''}>Exponential Backoff</option>
+                                <option value="linear" ${node.data.errorHandling?.retry?.backoff === 'linear' ? 'selected' : ''}>Linear Backoff</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Dead Letter Queue</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'deadLetterQueue.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.deadLetterQueue?.enabled ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.deadLetterQueue?.enabled ? 'selected' : ''}>Disabled</option>
+                            </select>
+                            <div class="form-help">Send failed messages to dead letter queue</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Enable Alerting</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'alerting.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.alerting?.enabled ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.alerting?.enabled ? 'selected' : ''}>Disabled</option>
+                            </select>
+                            <div class="form-help">Send alerts on errors</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Security</div>
+                        <div class="form-group">
+                            <label>Authentication Type</label>
+                            <select onchange="updateIntegrationSecurity('${node.id}', 'authType', this.value)">
+                                <option value="none" ${!node.data.security || node.data.security.length === 0 ? 'selected' : ''}>None</option>
+                                <option value="oauth2" ${node.data.security?.some(s => s.oauth2) ? 'selected' : ''}>OAuth 2.0</option>
+                                <option value="api-key" ${node.data.security?.some(s => s.apiKey) ? 'selected' : ''}>API Key</option>
+                                <option value="basic" ${node.data.security?.some(s => s.basic) ? 'selected' : ''}>Basic Auth</option>
+                                <option value="jwt" ${node.data.security?.some(s => s.jwt) ? 'selected' : ''}>JWT</option>
+                                <option value="mtls" ${node.data.security?.some(s => s.mtls) ? 'selected' : ''}>Mutual TLS</option>
+                            </select>
+                            <div class="form-help">Authentication mechanism for this integration</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Encryption</label>
+                            <select onchange="updateIntegrationSecurity('${node.id}', 'encryption', this.value)">
+                                <option value="tls" selected>TLS/HTTPS</option>
+                                <option value="none">None (not recommended)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Performance & SLA</div>
+                        <div class="form-group">
+                            <label>Expected Latency</label>
+                            <input type="text" value="${node.data.metadata?.sla?.latency || ''}" onchange="updateIntegrationSLA('${node.id}', 'latency', this.value)" placeholder="e.g., 5s, 100ms">
+                            <div class="form-help">Maximum acceptable latency</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Throughput Target</label>
+                            <input type="text" value="${node.data.metadata?.sla?.throughput || ''}" onchange="updateIntegrationSLA('${node.id}', 'throughput', this.value)" placeholder="e.g., 100/min, 1000/sec">
+                            <div class="form-help">Expected throughput rate</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Availability SLA</label>
+                            <input type="text" value="${node.data.metadata?.sla?.availability || ''}" onchange="updateIntegrationSLA('${node.id}', 'availability', this.value)" placeholder="e.g., 99.9%, 99.99%">
+                            <div class="form-help">Target availability percentage</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
                         <div class="form-section-title">Metadata</div>
                         <div class="form-group">
                             <label>Owner</label>
@@ -2184,6 +2455,11 @@
                             <label>Tags</label>
                             <input type="text" value="${(node.data.metadata.tags || []).join(', ')}" onchange="updateIntegrationMetadata('${node.id}', 'tags', this.value.split(',').map(t => t.trim()))">
                             <div class="form-help">Comma-separated tags for categorization</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Documentation URL</label>
+                            <input type="text" value="${node.data.metadata?.documentation || ''}" onchange="updateIntegrationMetadata('${node.id}', 'documentation', this.value)" placeholder="https://wiki.example.com/...">
+                            <div class="form-help">Link to integration documentation</div>
                         </div>
                     </div>
                 `;
@@ -2246,6 +2522,128 @@
                 const integration = integrationData.integrations.find(i => i.id === nodeId);
                 if (integration) {
                     integration.metadata[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationConnection(nodeId, endpoint, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data[endpoint].connection) {
+                    node.data[endpoint].connection = {};
+                }
+                node.data[endpoint].connection[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration[endpoint].connection) {
+                        integration[endpoint].connection = {};
+                    }
+                    integration[endpoint].connection[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationConfig(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.config) {
+                    node.data.config = {};
+                }
+                node.data.config[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.config) {
+                        integration.config = {};
+                    }
+                    integration.config[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationErrorHandling(nodeId, path, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.errorHandling) {
+                    node.data.errorHandling = { retry: {}, deadLetterQueue: {}, alerting: {} };
+                }
+
+                // Handle nested path like 'retry.maxAttempts'
+                const parts = path.split('.');
+                let target = node.data.errorHandling;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!target[parts[i]]) {
+                        target[parts[i]] = {};
+                    }
+                    target = target[parts[i]];
+                }
+                target[parts[parts.length - 1]] = value;
+
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.errorHandling) {
+                        integration.errorHandling = { retry: {}, deadLetterQueue: {}, alerting: {} };
+                    }
+                    target = integration.errorHandling;
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        if (!target[parts[i]]) {
+                            target[parts[i]] = {};
+                        }
+                        target = target[parts[i]];
+                    }
+                    target[parts[parts.length - 1]] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationSecurity(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.security) {
+                    node.data.security = [];
+                }
+
+                // Update security based on auth type
+                if (field === 'authType') {
+                    if (value === 'none') {
+                        node.data.security = [];
+                    } else {
+                        const securityObj = {};
+                        securityObj[value] = [];
+                        node.data.security = [securityObj];
+                    }
+                } else {
+                    // Handle other security fields
+                    if (node.data.security.length === 0) {
+                        node.data.security.push({});
+                    }
+                    node.data.security[0][field] = value;
+                }
+
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration.security = JSON.parse(JSON.stringify(node.data.security));
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationSLA(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.metadata.sla) {
+                    node.data.metadata.sla = {};
+                }
+                node.data.metadata.sla[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.metadata.sla) {
+                        integration.metadata.sla = {};
+                    }
+                    integration.metadata.sla[field] = value;
                 }
                 saveHistory();
             }
@@ -2384,6 +2782,7 @@
             }
 
             updateHistoryButtons();
+            updateValidationIndicator();
         }
 
         function undo() {
@@ -2469,6 +2868,166 @@
         }
 
         // ============ Export Functions ============
+        // ============ Validation ============
+        function validateIntegrationData() {
+            const errors = [];
+            const warnings = [];
+
+            // Validate info section
+            if (!integrationData.info.title || integrationData.info.title.trim() === '') {
+                errors.push('Integration title is required');
+            }
+            if (!integrationData.info.version || integrationData.info.version.trim() === '') {
+                warnings.push('Integration version is missing');
+            }
+
+            // Validate systems
+            const systemIds = Object.keys(integrationData.systems || {});
+            if (systemIds.length === 0) {
+                warnings.push('No systems defined - add at least one system');
+            }
+
+            systemIds.forEach(sysId => {
+                const system = integrationData.systems[sysId];
+                if (!system.name || system.name.trim() === '') {
+                    errors.push(`System '${sysId}' is missing a name`);
+                }
+                if (!system.type || system.type.trim() === '') {
+                    errors.push(`System '${sysId}' is missing a type`);
+                }
+            });
+
+            // Validate integrations
+            if (integrationData.integrations.length === 0) {
+                warnings.push('No integrations defined - add at least one integration');
+            }
+
+            integrationData.integrations.forEach((integration, idx) => {
+                const intId = integration.id || `Integration ${idx + 1}`;
+
+                if (!integration.name || integration.name.trim() === '') {
+                    errors.push(`${intId} is missing a name`);
+                }
+                if (!integration.pattern) {
+                    errors.push(`${intId} is missing a pattern`);
+                }
+
+                // Validate source
+                if (!integration.source) {
+                    errors.push(`${intId} is missing source configuration`);
+                } else {
+                    if (!integration.source.system) {
+                        errors.push(`${intId} source system is not set`);
+                    } else if (!systemIds.includes(integration.source.system)) {
+                        errors.push(`${intId} references non-existent source system '${integration.source.system}'`);
+                    }
+                    if (!integration.source.protocol) {
+                        warnings.push(`${intId} source protocol is not set`);
+                    }
+                }
+
+                // Validate target
+                if (!integration.target) {
+                    errors.push(`${intId} is missing target configuration`);
+                } else {
+                    if (!integration.target.system) {
+                        errors.push(`${intId} target system is not set`);
+                    } else if (!systemIds.includes(integration.target.system)) {
+                        errors.push(`${intId} references non-existent target system '${integration.target.system}'`);
+                    }
+                    if (!integration.target.protocol) {
+                        warnings.push(`${intId} target protocol is not set`);
+                    }
+                }
+
+                // Validate security
+                if (!integration.security || integration.security.length === 0) {
+                    warnings.push(`${intId} has no security configuration`);
+                }
+
+                // Validate error handling
+                if (!integration.errorHandling) {
+                    warnings.push(`${intId} has no error handling configuration`);
+                }
+
+                // Validate connection URLs
+                if (integration.source?.connection && !integration.source.connection.url) {
+                    warnings.push(`${intId} source connection URL is not set`);
+                }
+                if (integration.target?.connection && !integration.target.connection.url) {
+                    warnings.push(`${intId} target connection URL is not set`);
+                }
+            });
+
+            return { errors, warnings };
+        }
+
+        function showValidationResults() {
+            const { errors, warnings } = validateIntegrationData();
+            const totalIssues = errors.length + warnings.length;
+
+            if (totalIssues === 0) {
+                showAlert('success', 'Validation passed! No errors or warnings found.');
+                return;
+            }
+
+            let message = '<div style="text-align: left; max-height: 400px; overflow-y: auto;">';
+
+            if (errors.length > 0) {
+                message += '<h4 style="color: #ef4444; margin-top: 0;">❌ Errors (' + errors.length + ')</h4><ul style="margin: 0.5rem 0;">';
+                errors.forEach(err => {
+                    message += '<li style="margin: 0.25rem 0;">' + err + '</li>';
+                });
+                message += '</ul>';
+            }
+
+            if (warnings.length > 0) {
+                message += '<h4 style="color: #f59e0b; margin-top: 1rem;">⚠️ Warnings (' + warnings.length + ')</h4><ul style="margin: 0.5rem 0;">';
+                warnings.forEach(warn => {
+                    message += '<li style="margin: 0.25rem 0;">' + warn + '</li>';
+                });
+                message += '</ul>';
+            }
+
+            message += '</div>';
+
+            // Create custom modal for validation results
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Validation Results</h2>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                    </div>
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function updateValidationIndicator() {
+            const { errors, warnings } = validateIntegrationData();
+            const indicator = document.getElementById('validationIndicator');
+            if (!indicator) return;
+
+            const totalIssues = errors.length + warnings.length;
+
+            if (totalIssues === 0) {
+                indicator.innerHTML = '✅ Valid';
+                indicator.style.color = '#10b981';
+                indicator.title = 'No validation issues';
+            } else if (errors.length > 0) {
+                indicator.innerHTML = `❌ ${errors.length} Error${errors.length > 1 ? 's' : ''}`;
+                indicator.style.color = '#ef4444';
+                indicator.title = `${errors.length} error(s), ${warnings.length} warning(s)`;
+            } else {
+                indicator.innerHTML = `⚠️ ${warnings.length} Warning${warnings.length > 1 ? 's' : ''}`;
+                indicator.style.color = '#f59e0b';
+                indicator.title = `${warnings.length} warning(s)`;
+            }
+        }
+
         function exportJSON() {
             const json = JSON.stringify(integrationData, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
@@ -2658,39 +3217,8 @@
 
         // ============ Validation ============
         function validateDesign() {
-            const errors = [];
-
-            if (integrationData.integrations.length === 0) {
-                errors.push('No integrations defined');
-            }
-
-            integrationData.integrations.forEach(integration => {
-                if (!integration.name) {
-                    errors.push(`Integration ${integration.id}: Name is required`);
-                }
-                if (!integration.source.system) {
-                    errors.push(`Integration "${integration.name}": Source system is required`);
-                }
-                if (!integration.target.system) {
-                    errors.push(`Integration "${integration.name}": Target system is required`);
-                }
-                if (integration.source.system === integration.target.system) {
-                    errors.push(`Integration "${integration.name}": Source and target cannot be the same`);
-                }
-            });
-
-            Object.keys(integrationData.systems).forEach(sysId => {
-                const system = integrationData.systems[sysId];
-                if (!system.name) {
-                    errors.push(`System ${sysId}: Name is required`);
-                }
-            });
-
-            if (errors.length > 0) {
-                showAlert('error', 'Validation errors found:\n' + errors.map(e => '• ' + e).join('\n'));
-            } else {
-                showAlert('success', '✅ Validation passed! Your integration design is valid.');
-            }
+            // Redirect to new comprehensive validation
+            showValidationResults();
         }
 
         // ============ Utility Functions ============
