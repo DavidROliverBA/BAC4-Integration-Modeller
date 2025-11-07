@@ -217,6 +217,276 @@
             color: var(--text-secondary);
         }
 
+        /* Palette Search & Organization */
+        .palette-search {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .palette-search input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .palette-search input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .palette-search button {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--text-secondary);
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .collapse-icon {
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+
+        .collapsible.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 5;
+            font-size: 0.875rem;
+        }
+
+        .palette-item:hover .favorite-btn {
+            opacity: 1;
+        }
+
+        .favorite-btn.active {
+            opacity: 1;
+            background: var(--purple);
+            color: white;
+            border-color: var(--purple);
+        }
+
+        .palette-item.search-hidden {
+            display: none;
+        }
+
+        .palette-item.search-match {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--purple);
+        }
+
+        /* Multi-Select */
+        .node.selected {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+        }
+
+        .node.multi-selected {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+
+        .selection-box {
+            position: absolute;
+            border: 2px dashed var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .selection-badge {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--purple);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideInUp 0.3s ease-out;
+            z-index: 1001;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Grid */
+        .canvas.show-grid .canvas-inner {
+            background-image:
+                linear-gradient(to right, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Alignment Guides */
+        .alignment-guide {
+            position: absolute;
+            background: #f59e0b;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .alignment-guide.visible {
+            opacity: 1;
+        }
+
+        .alignment-guide.vertical {
+            width: 2px;
+            height: 100%;
+            top: 0;
+        }
+
+        .alignment-guide.horizontal {
+            height: 2px;
+            width: 100%;
+            left: 0;
+        }
+
+        #gridToggle.active,
+        #snapToggle.active,
+        #guidesToggle.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Mini-Map */
+        .mini-map {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            width: 200px;
+            height: 150px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mini-map.hidden {
+            display: none;
+        }
+
+        .mini-map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mini-map-canvas {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-secondary);
+        }
+
+        .mini-map-node {
+            position: absolute;
+            border-radius: 2px;
+            border: 1px solid;
+        }
+
+        .mini-map-node.system {
+            background: rgba(59, 130, 246, 0.7);
+            border-color: #3b82f6;
+        }
+
+        .mini-map-node.integration {
+            background: rgba(139, 92, 246, 0.7);
+            border-color: #8b5cf6;
+        }
+
+        .mini-map-viewport {
+            position: absolute;
+            border: 2px solid var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+            cursor: move;
+        }
+
+        /* Keyboard Shortcuts */
+        .shortcuts-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .shortcuts-table td {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .shortcuts-table td:first-child {
+            font-weight: 600;
+            color: var(--text-secondary);
+            width: 140px;
+        }
+
+        kbd {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
         /* Canvas */
         .canvas-container {
             position: relative;
@@ -440,6 +710,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            transform-origin: 0 0;
             overflow: visible;
         }
 
@@ -900,7 +1171,17 @@
         </div>
         <div class="toolbar-group">
             <button class="btn btn-secondary" onclick="newIntegration()" title="Create new integration">+ New Integration</button>
-            <button class="btn btn-secondary" onclick="validateDesign()" title="Validate design">✅ Validate</button>
+            <button class="btn btn-secondary" onclick="showValidationResults()" title="Validate design">🔍 Validate</button>
+            <span id="validationIndicator" style="margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: #f3f4f6; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;" onclick="showValidationResults()" title="Click to see validation details">✅ Valid</span>
+        </div>
+        <div class="toolbar-group">
+            <button class="btn btn-secondary" onclick="selectAll()" title="Select all (Ctrl+A)">Select All</button>
+            <button class="btn btn-secondary" id="bulkActions" onclick="showBulkActionsMenu()" style="display: none;" title="Bulk actions">Actions ▼</button>
+        </div>
+        <div class="toolbar-group">
+            <button class="btn btn-secondary btn-icon" onclick="toggleGrid()" id="gridToggle" title="Toggle grid (Ctrl+G)">#️⃣</button>
+            <button class="btn btn-secondary btn-icon" onclick="toggleSnapToGrid()" id="snapToggle" title="Snap to grid">🧲</button>
+            <button class="btn btn-secondary btn-icon" onclick="toggleAlignmentGuides()" id="guidesToggle" title="Alignment guides">📏</button>
         </div>
         <div class="toolbar-group">
             <button class="btn btn-secondary" onclick="autoLayout()" title="Auto-arrange nodes">📐 Auto Layout</button>
@@ -916,6 +1197,12 @@
     <div class="container">
         <!-- Left Panel: Component Palette -->
         <div class="palette">
+            <!-- Search Bar -->
+            <div class="palette-search">
+                <input type="text" id="paletteSearch" placeholder="🔍 Search components..." oninput="filterPalette(this.value)">
+                <button onclick="clearPaletteSearch()">✕</button>
+            </div>
+
             <div class="section">
                 <h3>🚀 Quick Start</h3>
                 <div class="quick-actions">
@@ -926,8 +1213,11 @@
             </div>
 
             <div class="section">
-                <h3>🖥️ Systems</h3>
-                <div class="palette-item" draggable="true" data-type="system" data-subtype="application">
+                <h3 class="collapsible" onclick="toggleSection('systems')">
+                    <span class="collapse-icon">▼</span> 🖥️ Systems (20)
+                </h3>
+                <div id="systemsContent">
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="application" data-search-terms="application business app software">
                     <span class="palette-icon">💼</span>
                     <div class="palette-label">
                         <div class="palette-label-title">Application</div>
@@ -962,15 +1252,152 @@
                         <div class="palette-label-desc">Legacy system</div>
                     </div>
                 </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="api-gateway">
+                    <span class="palette-icon">🚪</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">API Gateway</div>
+                        <div class="palette-label-desc">API routing</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="message-broker">
+                    <span class="palette-icon">📮</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Message Broker</div>
+                        <div class="palette-label-desc">Kafka, RabbitMQ</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="cache">
+                    <span class="palette-icon">⚡</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Cache</div>
+                        <div class="palette-label-desc">Redis, Memcached</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="file-storage">
+                    <span class="palette-icon">📦</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">File Storage</div>
+                        <div class="palette-label-desc">S3, Azure Blob</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="data-warehouse">
+                    <span class="palette-icon">🏢</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Data Warehouse</div>
+                        <div class="palette-label-desc">Snowflake, BigQuery</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="etl">
+                    <span class="palette-icon">🔀</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">ETL Tool</div>
+                        <div class="palette-label-desc">Transform data</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="container">
+                    <span class="palette-icon">🐳</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Container</div>
+                        <div class="palette-label-desc">Docker, K8s</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="serverless">
+                    <span class="palette-icon">⚙️</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Serverless</div>
+                        <div class="palette-label-desc">Lambda, Functions</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="auth">
+                    <span class="palette-icon">🔐</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Auth Service</div>
+                        <div class="palette-label-desc">OAuth, SAML</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="monitoring">
+                    <span class="palette-icon">📊</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Monitoring</div>
+                        <div class="palette-label-desc">Observability</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="cdn">
+                    <span class="palette-icon">🌍</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">CDN</div>
+                        <div class="palette-label-desc">Content delivery</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="analytics">
+                    <span class="palette-icon">📈</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Analytics</div>
+                        <div class="palette-label-desc">BI, reporting</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="crm">
+                    <span class="palette-icon">👥</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">CRM</div>
+                        <div class="palette-label-desc">Salesforce, Dynamics</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="erp">
+                    <span class="palette-icon">🏭</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">ERP</div>
+                        <div class="palette-label-desc">SAP, Oracle</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="system" data-subtype="hr">
+                    <span class="palette-icon">👔</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">HR System</div>
+                        <div class="palette-label-desc">Workday, ADP</div>
+                    </div>
+                </div>
+                </div>
             </div>
 
             <div class="section">
-                <h3>🔌 Integration Patterns</h3>
-                <div class="palette-item" draggable="true" data-type="integration" data-pattern="rest-api">
+                <h3 class="collapsible" onclick="toggleSection('patterns')">
+                    <span class="collapse-icon">▼</span> 🔌 Integration Patterns (13)
+                </h3>
+                <div id="patternsContent">
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="rest-api" data-search-terms="rest api http https web service">
                     <span class="palette-icon">🔌</span>
                     <div class="palette-label">
                         <div class="palette-label-title">REST API</div>
                         <div class="palette-label-desc">HTTP/HTTPS</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="soap-api">
+                    <span class="palette-icon">🧼</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">SOAP API</div>
+                        <div class="palette-label-desc">WSDL, XML</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="graphql">
+                    <span class="palette-icon">📊</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">GraphQL</div>
+                        <div class="palette-label-desc">Query API</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="grpc">
+                    <span class="palette-icon">⚡</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">gRPC</div>
+                        <div class="palette-label-desc">RPC, Protobuf</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="websocket">
+                    <span class="palette-icon">🔗</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">WebSocket</div>
+                        <div class="palette-label-desc">Real-time</div>
                     </div>
                 </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="event-stream">
@@ -980,18 +1407,18 @@
                         <div class="palette-label-desc">Kafka, Kinesis</div>
                     </div>
                 </div>
-                <div class="palette-item" draggable="true" data-type="integration" data-pattern="file-transfer">
-                    <span class="palette-icon">📁</span>
-                    <div class="palette-label">
-                        <div class="palette-label-title">File Transfer</div>
-                        <div class="palette-label-desc">FTP, SFTP</div>
-                    </div>
-                </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="messaging">
                     <span class="palette-icon">💬</span>
                     <div class="palette-label">
                         <div class="palette-label-title">Messaging</div>
                         <div class="palette-label-desc">Queue, MQ</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="file-transfer">
+                    <span class="palette-icon">📁</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">File Transfer</div>
+                        <div class="palette-label-desc">FTP, SFTP</div>
                     </div>
                 </div>
                 <div class="palette-item" draggable="true" data-type="integration" data-pattern="batch">
@@ -1007,6 +1434,28 @@
                         <div class="palette-label-title">Database Sync</div>
                         <div class="palette-label-desc">CDC, Replication</div>
                     </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="edi">
+                    <span class="palette-icon">📋</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">EDI</div>
+                        <div class="palette-label-desc">X12, EDIFACT</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="webhook">
+                    <span class="palette-icon">🪝</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Webhook</div>
+                        <div class="palette-label-desc">Event callback</div>
+                    </div>
+                </div>
+                <div class="palette-item" draggable="true" data-type="integration" data-pattern="custom">
+                    <span class="palette-icon">🔧</span>
+                    <div class="palette-label">
+                        <div class="palette-label-title">Custom</div>
+                        <div class="palette-label-desc">Custom logic</div>
+                    </div>
+                </div>
                 </div>
             </div>
 
@@ -1150,6 +1599,30 @@
 
     <!-- Hidden file input -->
     <input type="file" id="fileInput" accept=".json" onchange="loadJSONFile(event)">
+
+    <!-- Bulk Actions Menu -->
+    <div id="bulkActionsMenu" class="context-menu" style="display: none;">
+        <div class="context-menu-item" onclick="bulkAlign('left')">⬅️ Align Left</div>
+        <div class="context-menu-item" onclick="bulkAlign('right')">➡️ Align Right</div>
+        <div class="context-menu-item" onclick="bulkAlign('top')">⬆️ Align Top</div>
+        <div class="context-menu-item" onclick="bulkAlign('bottom')">⬇️ Align Bottom</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="bulkDistribute('horizontal')">↔️ Distribute Horizontal</div>
+        <div class="context-menu-item" onclick="bulkDistribute('vertical')">↕️ Distribute Vertical</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="bulkDuplicate()">📋 Duplicate</div>
+        <div class="context-menu-item" onclick="bulkDelete()" style="color: #ef4444;">🗑️ Delete All</div>
+    </div>
+
+    <!-- Mini-Map -->
+    <div class="mini-map" id="miniMap">
+        <div class="mini-map-header">
+            <span>Map</span>
+            <button onclick="toggleMiniMap()" style="background: none; border: none; cursor: pointer; font-size: 0.75rem;">⊙</button>
+        </div>
+        <div class="mini-map-canvas" id="miniMapCanvas"></div>
+        <div class="mini-map-viewport" id="miniMapViewport"></div>
+    </div>
 
     <script>
         // ============ Global State ============
@@ -2053,6 +2526,207 @@
         }
 
         // ============ Properties Panel ============
+
+        // ============ PHASE 2: Pattern-Specific Configuration ============
+        function getPatternSpecificConfig(node) {
+            const pattern = node.data.pattern;
+            const config = node.data.config || {};
+
+            switch(pattern) {
+                case 'rest-api':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🔌 REST API Configuration</div>
+                            <div class="form-group">
+                                <label>HTTP Method</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'method', this.value)">
+                                    <option value="GET" ${config.method === 'GET' ? 'selected' : ''}>GET</option>
+                                    <option value="POST" ${config.method === 'POST' ? 'selected' : ''}>POST</option>
+                                    <option value="PUT" ${config.method === 'PUT' ? 'selected' : ''}>PUT</option>
+                                    <option value="PATCH" ${config.method === 'PATCH' ? 'selected' : ''}>PATCH</option>
+                                    <option value="DELETE" ${config.method === 'DELETE' ? 'selected' : ''}>DELETE</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Endpoint Path</label>
+                                <input type="text" value="${config.endpoint || ''}" onchange="updatePatternConfig('${node.id}', 'endpoint', this.value)" placeholder="/api/v1/resource">
+                                <div class="form-help">API endpoint path</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Headers</label>
+                                <textarea onchange="updatePatternConfig('${node.id}', 'headers', this.value)" placeholder='{"Content-Type": "application/json"}'>${config.headers || ''}</textarea>
+                                <div class="form-help">Request headers (JSON format)</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Rate Limit</label>
+                                <input type="number" value="${config.rateLimit || 100}" onchange="updatePatternConfig('${node.id}', 'rateLimit', parseInt(this.value))" placeholder="100">
+                                <div class="form-help">Requests per minute</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'soap-api':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🧼 SOAP API Configuration</div>
+                            <div class="form-group">
+                                <label>WSDL URL</label>
+                                <input type="text" value="${config.wsdlUrl || ''}" onchange="updatePatternConfig('${node.id}', 'wsdlUrl', this.value)" placeholder="https://example.com/service?wsdl">
+                            </div>
+                            <div class="form-group">
+                                <label>Service Name</label>
+                                <input type="text" value="${config.serviceName || ''}" onchange="updatePatternConfig('${node.id}', 'serviceName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Port Name</label>
+                                <input type="text" value="${config.portName || ''}" onchange="updatePatternConfig('${node.id}', 'portName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>SOAP Version</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'soapVersion', this.value)">
+                                    <option value="1.1" ${config.soapVersion === '1.1' ? 'selected' : ''}>SOAP 1.1</option>
+                                    <option value="1.2" ${config.soapVersion === '1.2' ? 'selected' : ''}>SOAP 1.2</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+                case 'event-stream':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">📨 Event Stream Configuration</div>
+                            <div class="form-group">
+                                <label>Topic Name</label>
+                                <input type="text" value="${config.topic || ''}" onchange="updatePatternConfig('${node.id}', 'topic', this.value)" placeholder="my-topic">
+                                <div class="form-help">Kafka topic name</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Consumer Group</label>
+                                <input type="text" value="${config.consumerGroup || ''}" onchange="updatePatternConfig('${node.id}', 'consumerGroup', this.value)" placeholder="my-consumer-group">
+                            </div>
+                            <div class="form-group">
+                                <label>Partition Strategy</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'partitionStrategy', this.value)">
+                                    <option value="round-robin" ${config.partitionStrategy === 'round-robin' ? 'selected' : ''}>Round Robin</option>
+                                    <option value="key-hash" ${config.partitionStrategy === 'key-hash' ? 'selected' : ''}>Key Hash</option>
+                                    <option value="sticky" ${config.partitionStrategy === 'sticky' ? 'selected' : ''}>Sticky</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Offset Reset</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'offsetReset', this.value)">
+                                    <option value="earliest" ${config.offsetReset === 'earliest' ? 'selected' : ''}>Earliest</option>
+                                    <option value="latest" ${config.offsetReset === 'latest' ? 'selected' : ''}>Latest</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+                case 'messaging':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">💬 Messaging Configuration</div>
+                            <div class="form-group">
+                                <label>Queue Name</label>
+                                <input type="text" value="${config.queueName || ''}" onchange="updatePatternConfig('${node.id}', 'queueName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Message Type</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'messageType', this.value)">
+                                    <option value="persistent" ${config.messageType === 'persistent' ? 'selected' : ''}>Persistent</option>
+                                    <option value="transient" ${config.messageType === 'transient' ? 'selected' : ''}>Transient</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prefetch Count</label>
+                                <input type="number" value="${config.prefetchCount || 10}" onchange="updatePatternConfig('${node.id}', 'prefetchCount', parseInt(this.value))">
+                            </div>
+                        </div>
+                    `;
+
+                case 'file-transfer':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">📁 File Transfer Configuration</div>
+                            <div class="form-group">
+                                <label>Transfer Protocol</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'transferProtocol', this.value)">
+                                    <option value="ftp" ${config.transferProtocol === 'ftp' ? 'selected' : ''}>FTP</option>
+                                    <option value="sftp" ${config.transferProtocol === 'sftp' ? 'selected' : ''}>SFTP</option>
+                                    <option value="ftps" ${config.transferProtocol === 'ftps' ? 'selected' : ''}>FTPS</option>
+                                    <option value="s3" ${config.transferProtocol === 's3' ? 'selected' : ''}>Amazon S3</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Directory Path</label>
+                                <input type="text" value="${config.directoryPath || ''}" onchange="updatePatternConfig('${node.id}', 'directoryPath', this.value)" placeholder="/upload">
+                            </div>
+                            <div class="form-group">
+                                <label>File Pattern</label>
+                                <input type="text" value="${config.filePattern || ''}" onchange="updatePatternConfig('${node.id}', 'filePattern', this.value)" placeholder="*.csv">
+                                <div class="form-help">Glob pattern for file matching</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'database-sync':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🔄 Database Sync Configuration</div>
+                            <div class="form-group">
+                                <label>Sync Method</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'syncMethod', this.value)">
+                                    <option value="cdc" ${config.syncMethod === 'cdc' ? 'selected' : ''}>Change Data Capture</option>
+                                    <option value="replication" ${config.syncMethod === 'replication' ? 'selected' : ''}>Replication</option>
+                                    <option value="polling" ${config.syncMethod === 'polling' ? 'selected' : ''}>Polling</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Table Name</label>
+                                <input type="text" value="${config.tableName || ''}" onchange="updatePatternConfig('${node.id}', 'tableName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Sync Frequency</label>
+                                <input type="text" value="${config.syncFrequency || ''}" onchange="updatePatternConfig('${node.id}', 'syncFrequency', this.value)" placeholder="*/5 * * * *">
+                                <div class="form-help">Cron expression for polling mode</div>
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">⚙️ Pattern Configuration</div>
+                            <div class="form-group">
+                                <label>Custom Configuration</label>
+                                <textarea onchange="updatePatternConfig('${node.id}', 'customConfig', this.value)" placeholder='{"key": "value"}'>${config.customConfig || ''}</textarea>
+                                <div class="form-help">Pattern-specific configuration (JSON format)</div>
+                            </div>
+                        </div>
+                    `;
+            }
+        }
+
+        function updatePatternConfig(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.config) {
+                node.data.config = {};
+            }
+            node.data.config[field] = value;
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                if (!integration.config) {
+                    integration.config = {};
+                }
+                integration.config[field] = value;
+            }
+
+            saveHistory();
+        }
+
         function showProperties(node) {
             const panel = document.getElementById('propertiesPanel');
 
@@ -2077,6 +2751,21 @@
                                 <option value="service" ${node.data.type === 'service' ? 'selected' : ''}>Service</option>
                                 <option value="external" ${node.data.type === 'external' ? 'selected' : ''}>External</option>
                                 <option value="legacy" ${node.data.type === 'legacy' ? 'selected' : ''}>Legacy</option>
+                                <option value="api-gateway" ${node.data.type === 'api-gateway' ? 'selected' : ''}>API Gateway</option>
+                                <option value="message-broker" ${node.data.type === 'message-broker' ? 'selected' : ''}>Message Broker</option>
+                                <option value="cache" ${node.data.type === 'cache' ? 'selected' : ''}>Cache</option>
+                                <option value="file-storage" ${node.data.type === 'file-storage' ? 'selected' : ''}>File Storage</option>
+                                <option value="data-warehouse" ${node.data.type === 'data-warehouse' ? 'selected' : ''}>Data Warehouse</option>
+                                <option value="etl" ${node.data.type === 'etl' ? 'selected' : ''}>ETL Tool</option>
+                                <option value="container" ${node.data.type === 'container' ? 'selected' : ''}>Container</option>
+                                <option value="serverless" ${node.data.type === 'serverless' ? 'selected' : ''}>Serverless</option>
+                                <option value="auth" ${node.data.type === 'auth' ? 'selected' : ''}>Auth Service</option>
+                                <option value="monitoring" ${node.data.type === 'monitoring' ? 'selected' : ''}>Monitoring</option>
+                                <option value="cdn" ${node.data.type === 'cdn' ? 'selected' : ''}>CDN</option>
+                                <option value="analytics" ${node.data.type === 'analytics' ? 'selected' : ''}>Analytics</option>
+                                <option value="crm" ${node.data.type === 'crm' ? 'selected' : ''}>CRM</option>
+                                <option value="erp" ${node.data.type === 'erp' ? 'selected' : ''}>ERP</option>
+                                <option value="hr" ${node.data.type === 'hr' ? 'selected' : ''}>HR System</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -2204,6 +2893,109 @@
                     </div>
 
                     <div class="form-section">
+                        <div class="form-section-title">Connection Configuration</div>
+                        <div class="form-group">
+                            <label>Source URL/Endpoint</label>
+                            <input type="text" value="${node.data.source.connection?.url || ''}" onchange="updateIntegrationConnection('${node.id}', 'source', 'url', this.value)" placeholder="e.g., https://api.example.com">
+                            <div class="form-help">Connection URL or endpoint for source system</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Target URL/Endpoint</label>
+                            <input type="text" value="${node.data.target.connection?.url || ''}" onchange="updateIntegrationConnection('${node.id}', 'target', 'url', this.value)" placeholder="e.g., https://target.example.com">
+                            <div class="form-help">Connection URL or endpoint for target system</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Timeout (seconds)</label>
+                            <input type="number" value="${parseInt(node.data.config?.timeout) || 30}" onchange="updateIntegrationConfig('${node.id}', 'timeout', this.value + 's')" min="1" max="300">
+                            <div class="form-help">Request timeout in seconds</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Error Handling</div>
+                        <div class="form-group">
+                            <label>Enable Retry</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'retry.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.retry?.maxAttempts ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.retry?.maxAttempts ? 'selected' : ''}>Disabled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Retry Attempts</label>
+                            <input type="number" value="${node.data.errorHandling?.retry?.maxAttempts || 3}" onchange="updateIntegrationErrorHandling('${node.id}', 'retry.maxAttempts', parseInt(this.value))" min="0" max="10">
+                            <div class="form-help">Number of retry attempts on failure</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Retry Strategy</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'retry.backoff', this.value)">
+                                <option value="fixed" ${node.data.errorHandling?.retry?.backoff === 'fixed' ? 'selected' : ''}>Fixed Delay</option>
+                                <option value="exponential" ${node.data.errorHandling?.retry?.backoff === 'exponential' ? 'selected' : ''}>Exponential Backoff</option>
+                                <option value="linear" ${node.data.errorHandling?.retry?.backoff === 'linear' ? 'selected' : ''}>Linear Backoff</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Dead Letter Queue</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'deadLetterQueue.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.deadLetterQueue?.enabled ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.deadLetterQueue?.enabled ? 'selected' : ''}>Disabled</option>
+                            </select>
+                            <div class="form-help">Send failed messages to dead letter queue</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Enable Alerting</label>
+                            <select onchange="updateIntegrationErrorHandling('${node.id}', 'alerting.enabled', this.value === 'true')">
+                                <option value="true" ${node.data.errorHandling?.alerting?.enabled ? 'selected' : ''}>Enabled</option>
+                                <option value="false" ${!node.data.errorHandling?.alerting?.enabled ? 'selected' : ''}>Disabled</option>
+                            </select>
+                            <div class="form-help">Send alerts on errors</div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Security</div>
+                        <div class="form-group">
+                            <label>Authentication Type</label>
+                            <select onchange="updateIntegrationSecurity('${node.id}', 'authType', this.value)">
+                                <option value="none" ${!node.data.security || node.data.security.length === 0 ? 'selected' : ''}>None</option>
+                                <option value="oauth2" ${node.data.security?.some(s => s.oauth2) ? 'selected' : ''}>OAuth 2.0</option>
+                                <option value="api-key" ${node.data.security?.some(s => s.apiKey) ? 'selected' : ''}>API Key</option>
+                                <option value="basic" ${node.data.security?.some(s => s.basic) ? 'selected' : ''}>Basic Auth</option>
+                                <option value="jwt" ${node.data.security?.some(s => s.jwt) ? 'selected' : ''}>JWT</option>
+                                <option value="mtls" ${node.data.security?.some(s => s.mtls) ? 'selected' : ''}>Mutual TLS</option>
+                            </select>
+                            <div class="form-help">Authentication mechanism for this integration</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Encryption</label>
+                            <select onchange="updateIntegrationSecurity('${node.id}', 'encryption', this.value)">
+                                <option value="tls" selected>TLS/HTTPS</option>
+                                <option value="none">None (not recommended)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-section-title">Performance & SLA</div>
+                        <div class="form-group">
+                            <label>Expected Latency</label>
+                            <input type="text" value="${node.data.metadata?.sla?.latency || ''}" onchange="updateIntegrationSLA('${node.id}', 'latency', this.value)" placeholder="e.g., 5s, 100ms">
+                            <div class="form-help">Maximum acceptable latency</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Throughput Target</label>
+                            <input type="text" value="${node.data.metadata?.sla?.throughput || ''}" onchange="updateIntegrationSLA('${node.id}', 'throughput', this.value)" placeholder="e.g., 100/min, 1000/sec">
+                            <div class="form-help">Expected throughput rate</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Availability SLA</label>
+                            <input type="text" value="${node.data.metadata?.sla?.availability || ''}" onchange="updateIntegrationSLA('${node.id}', 'availability', this.value)" placeholder="e.g., 99.9%, 99.99%">
+                            <div class="form-help">Target availability percentage</div>
+                        </div>
+                    </div>
+
+                    ${getPatternSpecificConfig(node)}
+
+                    <div class="form-section">
                         <div class="form-section-title">Metadata</div>
                         <div class="form-group">
                             <label>Owner</label>
@@ -2214,6 +3006,11 @@
                             <label>Tags</label>
                             <input type="text" value="${(node.data.metadata.tags || []).join(', ')}" onchange="updateIntegrationMetadata('${node.id}', 'tags', this.value.split(',').map(t => t.trim()))">
                             <div class="form-help">Comma-separated tags for categorization</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Documentation URL</label>
+                            <input type="text" value="${node.data.metadata?.documentation || ''}" onchange="updateIntegrationMetadata('${node.id}', 'documentation', this.value)" placeholder="https://wiki.example.com/...">
+                            <div class="form-help">Link to integration documentation</div>
                         </div>
                     </div>
                 `;
@@ -2276,6 +3073,128 @@
                 const integration = integrationData.integrations.find(i => i.id === nodeId);
                 if (integration) {
                     integration.metadata[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationConnection(nodeId, endpoint, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data[endpoint].connection) {
+                    node.data[endpoint].connection = {};
+                }
+                node.data[endpoint].connection[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration[endpoint].connection) {
+                        integration[endpoint].connection = {};
+                    }
+                    integration[endpoint].connection[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationConfig(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.config) {
+                    node.data.config = {};
+                }
+                node.data.config[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.config) {
+                        integration.config = {};
+                    }
+                    integration.config[field] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationErrorHandling(nodeId, path, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.errorHandling) {
+                    node.data.errorHandling = { retry: {}, deadLetterQueue: {}, alerting: {} };
+                }
+
+                // Handle nested path like 'retry.maxAttempts'
+                const parts = path.split('.');
+                let target = node.data.errorHandling;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!target[parts[i]]) {
+                        target[parts[i]] = {};
+                    }
+                    target = target[parts[i]];
+                }
+                target[parts[parts.length - 1]] = value;
+
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.errorHandling) {
+                        integration.errorHandling = { retry: {}, deadLetterQueue: {}, alerting: {} };
+                    }
+                    target = integration.errorHandling;
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        if (!target[parts[i]]) {
+                            target[parts[i]] = {};
+                        }
+                        target = target[parts[i]];
+                    }
+                    target[parts[parts.length - 1]] = value;
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationSecurity(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.security) {
+                    node.data.security = [];
+                }
+
+                // Update security based on auth type
+                if (field === 'authType') {
+                    if (value === 'none') {
+                        node.data.security = [];
+                    } else {
+                        const securityObj = {};
+                        securityObj[value] = [];
+                        node.data.security = [securityObj];
+                    }
+                } else {
+                    // Handle other security fields
+                    if (node.data.security.length === 0) {
+                        node.data.security.push({});
+                    }
+                    node.data.security[0][field] = value;
+                }
+
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    integration.security = JSON.parse(JSON.stringify(node.data.security));
+                }
+                saveHistory();
+            }
+        }
+
+        function updateIntegrationSLA(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (node && node.type === 'integration') {
+                if (!node.data.metadata.sla) {
+                    node.data.metadata.sla = {};
+                }
+                node.data.metadata.sla[field] = value;
+                const integration = integrationData.integrations.find(i => i.id === nodeId);
+                if (integration) {
+                    if (!integration.metadata.sla) {
+                        integration.metadata.sla = {};
+                    }
+                    integration.metadata.sla[field] = value;
                 }
                 saveHistory();
             }
@@ -2414,6 +3333,7 @@
             }
 
             updateHistoryButtons();
+            updateValidationIndicator();
         }
 
         function undo() {
@@ -2499,6 +3419,166 @@
         }
 
         // ============ Export Functions ============
+        // ============ Validation ============
+        function validateIntegrationData() {
+            const errors = [];
+            const warnings = [];
+
+            // Validate info section
+            if (!integrationData.info.title || integrationData.info.title.trim() === '') {
+                errors.push('Integration title is required');
+            }
+            if (!integrationData.info.version || integrationData.info.version.trim() === '') {
+                warnings.push('Integration version is missing');
+            }
+
+            // Validate systems
+            const systemIds = Object.keys(integrationData.systems || {});
+            if (systemIds.length === 0) {
+                warnings.push('No systems defined - add at least one system');
+            }
+
+            systemIds.forEach(sysId => {
+                const system = integrationData.systems[sysId];
+                if (!system.name || system.name.trim() === '') {
+                    errors.push(`System '${sysId}' is missing a name`);
+                }
+                if (!system.type || system.type.trim() === '') {
+                    errors.push(`System '${sysId}' is missing a type`);
+                }
+            });
+
+            // Validate integrations
+            if (integrationData.integrations.length === 0) {
+                warnings.push('No integrations defined - add at least one integration');
+            }
+
+            integrationData.integrations.forEach((integration, idx) => {
+                const intId = integration.id || `Integration ${idx + 1}`;
+
+                if (!integration.name || integration.name.trim() === '') {
+                    errors.push(`${intId} is missing a name`);
+                }
+                if (!integration.pattern) {
+                    errors.push(`${intId} is missing a pattern`);
+                }
+
+                // Validate source
+                if (!integration.source) {
+                    errors.push(`${intId} is missing source configuration`);
+                } else {
+                    if (!integration.source.system) {
+                        errors.push(`${intId} source system is not set`);
+                    } else if (!systemIds.includes(integration.source.system)) {
+                        errors.push(`${intId} references non-existent source system '${integration.source.system}'`);
+                    }
+                    if (!integration.source.protocol) {
+                        warnings.push(`${intId} source protocol is not set`);
+                    }
+                }
+
+                // Validate target
+                if (!integration.target) {
+                    errors.push(`${intId} is missing target configuration`);
+                } else {
+                    if (!integration.target.system) {
+                        errors.push(`${intId} target system is not set`);
+                    } else if (!systemIds.includes(integration.target.system)) {
+                        errors.push(`${intId} references non-existent target system '${integration.target.system}'`);
+                    }
+                    if (!integration.target.protocol) {
+                        warnings.push(`${intId} target protocol is not set`);
+                    }
+                }
+
+                // Validate security
+                if (!integration.security || integration.security.length === 0) {
+                    warnings.push(`${intId} has no security configuration`);
+                }
+
+                // Validate error handling
+                if (!integration.errorHandling) {
+                    warnings.push(`${intId} has no error handling configuration`);
+                }
+
+                // Validate connection URLs
+                if (integration.source?.connection && !integration.source.connection.url) {
+                    warnings.push(`${intId} source connection URL is not set`);
+                }
+                if (integration.target?.connection && !integration.target.connection.url) {
+                    warnings.push(`${intId} target connection URL is not set`);
+                }
+            });
+
+            return { errors, warnings };
+        }
+
+        function showValidationResults() {
+            const { errors, warnings } = validateIntegrationData();
+            const totalIssues = errors.length + warnings.length;
+
+            if (totalIssues === 0) {
+                showAlert('success', 'Validation passed! No errors or warnings found.');
+                return;
+            }
+
+            let message = '<div style="text-align: left; max-height: 400px; overflow-y: auto;">';
+
+            if (errors.length > 0) {
+                message += '<h4 style="color: #ef4444; margin-top: 0;">❌ Errors (' + errors.length + ')</h4><ul style="margin: 0.5rem 0;">';
+                errors.forEach(err => {
+                    message += '<li style="margin: 0.25rem 0;">' + err + '</li>';
+                });
+                message += '</ul>';
+            }
+
+            if (warnings.length > 0) {
+                message += '<h4 style="color: #f59e0b; margin-top: 1rem;">⚠️ Warnings (' + warnings.length + ')</h4><ul style="margin: 0.5rem 0;">';
+                warnings.forEach(warn => {
+                    message += '<li style="margin: 0.25rem 0;">' + warn + '</li>';
+                });
+                message += '</ul>';
+            }
+
+            message += '</div>';
+
+            // Create custom modal for validation results
+            const modal = document.createElement('div');
+            modal.className = 'modal active';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Validation Results</h2>
+                        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+                    </div>
+                    ${message}
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function updateValidationIndicator() {
+            const { errors, warnings } = validateIntegrationData();
+            const indicator = document.getElementById('validationIndicator');
+            if (!indicator) return;
+
+            const totalIssues = errors.length + warnings.length;
+
+            if (totalIssues === 0) {
+                indicator.innerHTML = '✅ Valid';
+                indicator.style.color = '#10b981';
+                indicator.title = 'No validation issues';
+            } else if (errors.length > 0) {
+                indicator.innerHTML = `❌ ${errors.length} Error${errors.length > 1 ? 's' : ''}`;
+                indicator.style.color = '#ef4444';
+                indicator.title = `${errors.length} error(s), ${warnings.length} warning(s)`;
+            } else {
+                indicator.innerHTML = `⚠️ ${warnings.length} Warning${warnings.length > 1 ? 's' : ''}`;
+                indicator.style.color = '#f59e0b';
+                indicator.title = `${warnings.length} warning(s)`;
+            }
+        }
+
         function exportJSON() {
             const json = JSON.stringify(integrationData, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
@@ -2688,39 +3768,8 @@
 
         // ============ Validation ============
         function validateDesign() {
-            const errors = [];
-
-            if (integrationData.integrations.length === 0) {
-                errors.push('No integrations defined');
-            }
-
-            integrationData.integrations.forEach(integration => {
-                if (!integration.name) {
-                    errors.push(`Integration ${integration.id}: Name is required`);
-                }
-                if (!integration.source.system) {
-                    errors.push(`Integration "${integration.name}": Source system is required`);
-                }
-                if (!integration.target.system) {
-                    errors.push(`Integration "${integration.name}": Target system is required`);
-                }
-                if (integration.source.system === integration.target.system) {
-                    errors.push(`Integration "${integration.name}": Source and target cannot be the same`);
-                }
-            });
-
-            Object.keys(integrationData.systems).forEach(sysId => {
-                const system = integrationData.systems[sysId];
-                if (!system.name) {
-                    errors.push(`System ${sysId}: Name is required`);
-                }
-            });
-
-            if (errors.length > 0) {
-                showAlert('error', 'Validation errors found:\n' + errors.map(e => '• ' + e).join('\n'));
-            } else {
-                showAlert('success', '✅ Validation passed! Your integration design is valid.');
-            }
+            // Redirect to new comprehensive validation
+            showValidationResults();
         }
 
         // ============ Utility Functions ============
@@ -2753,6 +3802,7 @@
                 history = [];
                 historyIndex = -1;
 
+                // Clear nodes
                 const canvasInner = document.getElementById('canvasInner');
                 canvasInner.innerHTML = `
                     <div class="empty-state">
@@ -2764,6 +3814,10 @@
                         <p style="margin-top: 0.5rem;">Or load an example to get started quickly</p>
                     </div>
                 `;
+
+                // Clear connections/edges
+                const svg = document.getElementById('connectionsSvg');
+                svg.querySelectorAll('path:not(.creating), line, text, rect').forEach(el => el.remove());
 
                 deselectAll();
                 resetZoom();
@@ -2796,6 +3850,388 @@
                 alertDiv.remove();
             }, 5000);
         }
+
+        // ============ PHASE 1: Core UX Improvements ============
+
+        // === Palette Search & Filter ===
+        function filterPalette(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            const items = document.querySelectorAll('.palette-item');
+
+            items.forEach(item => {
+                if (!term) {
+                    item.classList.remove('search-hidden', 'search-match');
+                    return;
+                }
+
+                const searchTerms = item.getAttribute('data-search-terms') || '';
+                const title = item.querySelector('.palette-label-title')?.textContent || '';
+                const desc = item.querySelector('.palette-label-desc')?.textContent || '';
+                const searchableText = `${searchTerms} ${title} ${desc}`.toLowerCase();
+
+                if (searchableText.includes(term)) {
+                    item.classList.remove('search-hidden');
+                    item.classList.add('search-match');
+                } else {
+                    item.classList.add('search-hidden');
+                    item.classList.remove('search-match');
+                }
+            });
+        }
+
+        function clearPaletteSearch() {
+            document.getElementById('paletteSearch').value = '';
+            filterPalette('');
+        }
+
+        function toggleSection(sectionId) {
+            const content = document.getElementById(`${sectionId}Content`);
+            const header = event.currentTarget;
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                header.classList.remove('collapsed');
+            } else {
+                content.style.display = 'none';
+                header.classList.add('collapsed');
+            }
+        }
+
+        // === Multi-Select System ===
+        let selectedNodes = new Set();
+
+        function selectAll() {
+            selectedNodes.clear();
+            canvasNodes.forEach(node => selectedNodes.add(node.id));
+            updateSelectionUI();
+            showAlert('info', `Selected ${canvasNodes.length} items`);
+        }
+
+        function updateSelectionUI() {
+            document.querySelectorAll('.system-node, .integration-node').forEach(nodeEl => {
+                const nodeId = nodeEl.getAttribute('data-node-id');
+                if (selectedNodes.has(nodeId)) {
+                    nodeEl.classList.add(selectedNodes.size === 1 ? 'selected' : 'multi-selected');
+                } else {
+                    nodeEl.classList.remove('selected', 'multi-selected');
+                }
+            });
+
+            const bulkBtn = document.getElementById('bulkActions');
+            if (selectedNodes.size > 1) {
+                bulkBtn.style.display = 'block';
+                bulkBtn.textContent = `Actions (${selectedNodes.size}) ▼`;
+            } else {
+                bulkBtn.style.display = 'none';
+            }
+
+            updateSelectionBadge();
+        }
+
+        function updateSelectionBadge() {
+            let badge = document.getElementById('selectionBadge');
+
+            if (selectedNodes.size > 1) {
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.id = 'selectionBadge';
+                    badge.className = 'selection-badge';
+                    document.body.appendChild(badge);
+                }
+                badge.innerHTML = `<span>${selectedNodes.size} selected</span>
+                    <button onclick="deselectAll()" style="background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 1.5rem; height: 1.5rem; cursor: pointer; color: white;">✕</button>`;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        // Override deselectAll to work with multi-select
+        const originalDeselectAll = deselectAll;
+        deselectAll = function() {
+            selectedNodes.clear();
+            updateSelectionUI();
+            originalDeselectAll();
+        };
+
+        // === Bulk Operations ===
+        function showBulkActionsMenu() {
+            const menu = document.getElementById('bulkActionsMenu');
+            const btn = document.getElementById('bulkActions');
+            const rect = btn.getBoundingClientRect();
+
+            menu.style.display = 'block';
+            menu.style.left = rect.left + 'px';
+            menu.style.top = (rect.bottom + 5) + 'px';
+
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu(e) {
+                    if (!menu.contains(e.target) && e.target !== btn) {
+                        menu.style.display = 'none';
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+            }, 0);
+        }
+
+        function bulkAlign(direction) {
+            if (selectedNodes.size < 2) return;
+
+            const nodes = Array.from(selectedNodes).map(id => canvasNodes.find(n => n.id === id));
+
+            if (direction === 'left') {
+                const minX = Math.min(...nodes.map(n => n.x));
+                nodes.forEach(node => node.x = minX);
+            } else if (direction === 'right') {
+                const maxX = Math.max(...nodes.map(n => n.x + 200));
+                nodes.forEach(node => node.x = maxX - 200);
+            } else if (direction === 'top') {
+                const minY = Math.min(...nodes.map(n => n.y));
+                nodes.forEach(node => node.y = minY);
+            } else if (direction === 'bottom') {
+                const maxY = Math.max(...nodes.map(n => n.y + 150));
+                nodes.forEach(node => node.y = maxY - 150);
+            }
+
+            renderCanvas();
+            saveHistory();
+            showAlert('success', `Aligned ${nodes.length} items to ${direction}`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDistribute(direction) {
+            if (selectedNodes.size < 3) {
+                showAlert('warning', 'Need at least 3 items to distribute');
+                return;
+            }
+
+            const nodes = Array.from(selectedNodes)
+                .map(id => canvasNodes.find(n => n.id === id))
+                .sort((a, b) => direction === 'horizontal' ? a.x - b.x : a.y - b.y);
+
+            if (direction === 'horizontal') {
+                const minX = nodes[0].x;
+                const maxX = nodes[nodes.length - 1].x;
+                const spacing = (maxX - minX) / (nodes.length - 1);
+                nodes.forEach((node, i) => {
+                    if (i > 0 && i < nodes.length - 1) node.x = minX + spacing * i;
+                });
+            } else {
+                const minY = nodes[0].y;
+                const maxY = nodes[nodes.length - 1].y;
+                const spacing = (maxY - minY) / (nodes.length - 1);
+                nodes.forEach((node, i) => {
+                    if (i > 0 && i < nodes.length - 1) node.y = minY + spacing * i;
+                });
+            }
+
+            renderCanvas();
+            saveHistory();
+            showAlert('success', `Distributed ${nodes.length} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDuplicate() {
+            if (selectedNodes.size === 0) return;
+
+            const newNodes = [];
+            selectedNodes.forEach(nodeId => {
+                const node = canvasNodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                const newId = 'node-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                const newNode = {
+                    ...JSON.parse(JSON.stringify(node)),
+                    id: newId,
+                    x: node.x + 50,
+                    y: node.y + 50,
+                    data: { ...node.data, name: node.data.name + ' (Copy)' }
+                };
+
+                canvasNodes.push(newNode);
+                newNodes.push(newId);
+
+                if (node.type === 'system') {
+                    integrationData.systems[newId] = newNode.data;
+                } else {
+                    integrationData.integrations.push({ ...newNode.data, id: newId });
+                }
+            });
+
+            selectedNodes.clear();
+            newNodes.forEach(id => selectedNodes.add(id));
+            renderCanvas();
+            updateSelectionUI();
+            saveHistory();
+            showAlert('success', `Duplicated ${newNodes.length} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        function bulkDelete() {
+            if (selectedNodes.size === 0) return;
+
+            const count = selectedNodes.size;
+            if (!confirm(`Delete ${count} selected item${count > 1 ? 's' : ''}?`)) return;
+
+            selectedNodes.forEach(nodeId => {
+                const node = canvasNodes.find(n => n.id === nodeId);
+                if (!node) return;
+
+                if (node.type === 'system') {
+                    delete integrationData.systems[nodeId];
+                    integrationData.integrations.forEach(i => {
+                        if (i.source.system === nodeId) i.source.system = '';
+                        if (i.target.system === nodeId) i.target.system = '';
+                    });
+                } else {
+                    integrationData.integrations = integrationData.integrations.filter(i => i.id !== nodeId);
+                }
+            });
+
+            canvasNodes = canvasNodes.filter(n => !selectedNodes.has(n.id));
+            selectedNodes.clear();
+            renderCanvas();
+            updateSelectionUI();
+            saveHistory();
+            showAlert('success', `Deleted ${count} items`);
+            document.getElementById('bulkActionsMenu').style.display = 'none';
+        }
+
+        // === Grid & Alignment Guides ===
+        let gridSettings = {
+            enabled: false,
+            snapEnabled: false,
+            guidesEnabled: true,
+            gridSize: 20
+        };
+
+        function toggleGrid() {
+            gridSettings.enabled = !gridSettings.enabled;
+            const canvas = document.getElementById('canvas');
+            const btn = document.getElementById('gridToggle');
+
+            if (gridSettings.enabled) {
+                canvas.classList.add('show-grid');
+                btn.classList.add('active');
+            } else {
+                canvas.classList.remove('show-grid');
+                btn.classList.remove('active');
+            }
+        }
+
+        function toggleSnapToGrid() {
+            gridSettings.snapEnabled = !gridSettings.snapEnabled;
+            const btn = document.getElementById('snapToggle');
+            btn.classList.toggle('active', gridSettings.snapEnabled);
+            showAlert('info', gridSettings.snapEnabled ? 'Snap to grid enabled' : 'Snap to grid disabled');
+        }
+
+        function toggleAlignmentGuides() {
+            gridSettings.guidesEnabled = !gridSettings.guidesEnabled;
+            const btn = document.getElementById('guidesToggle');
+            btn.classList.toggle('active', gridSettings.guidesEnabled);
+        }
+
+        function snapToGrid(value) {
+            if (!gridSettings.snapEnabled) return value;
+            return Math.round(value / gridSettings.gridSize) * gridSettings.gridSize;
+        }
+
+        // === Mini-Map ===
+        let miniMapState = { enabled: true };
+
+        function toggleMiniMap() {
+            miniMapState.enabled = !miniMapState.enabled;
+            document.getElementById('miniMap').classList.toggle('hidden', !miniMapState.enabled);
+        }
+
+        function renderMiniMap() {
+            if (!miniMapState.enabled || canvasNodes.length === 0) return;
+
+            const container = document.getElementById('miniMapCanvas');
+            container.innerHTML = '';
+
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            canvasNodes.forEach(node => {
+                minX = Math.min(minX, node.x);
+                minY = Math.min(minY, node.y);
+                maxX = Math.max(maxX, node.x + 200);
+                maxY = Math.max(maxY, node.y + 150);
+            });
+
+            const scale = Math.min(container.clientWidth / (maxX - minX), container.clientHeight / (maxY - minY), 1);
+
+            canvasNodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `mini-map-node ${node.type}`;
+                nodeEl.style.left = ((node.x - minX) * scale) + 'px';
+                nodeEl.style.top = ((node.y - minY) * scale) + 'px';
+                nodeEl.style.width = (200 * scale) + 'px';
+                nodeEl.style.height = (150 * scale) + 'px';
+                container.appendChild(nodeEl);
+            });
+        }
+
+        // Update mini-map when canvas changes
+        const originalRenderCanvas = renderCanvas;
+        renderCanvas = function() {
+            originalRenderCanvas();
+            setTimeout(renderMiniMap, 100);
+        };
+
+        // === Enhanced Keyboard Shortcuts ===
+        document.addEventListener('keydown', (e) => {
+            if (e.target.matches('input, textarea, select')) return;
+
+            const ctrl = e.ctrlKey || e.metaKey;
+
+            // Ctrl+A: Select all
+            if (ctrl && e.key === 'a') {
+                e.preventDefault();
+                selectAll();
+            }
+
+            // Escape: Deselect
+            if (e.key === 'Escape') {
+                deselectAll();
+            }
+
+            // Delete/Backspace: Delete selected
+            if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodes.size > 0) {
+                e.preventDefault();
+                bulkDelete();
+            }
+
+            // Ctrl+D: Duplicate
+            if (ctrl && e.key === 'd' && selectedNodes.size > 0) {
+                e.preventDefault();
+                bulkDuplicate();
+            }
+
+            // Ctrl+G: Toggle grid
+            if (ctrl && e.key === 'g') {
+                e.preventDefault();
+                toggleGrid();
+            }
+
+            // Ctrl+Arrow: Bulk align
+            if (ctrl && selectedNodes.size > 1) {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); bulkAlign('left'); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); bulkAlign('right'); }
+                if (e.key === 'ArrowUp') { e.preventDefault(); bulkAlign('top'); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); bulkAlign('bottom'); }
+            }
+
+            // Ctrl+K: Focus search
+            if (ctrl && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('paletteSearch')?.focus();
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMiniMap();
+        });
     </script>
 </body>
 </html>
