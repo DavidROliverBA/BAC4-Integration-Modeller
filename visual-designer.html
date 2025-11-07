@@ -2526,6 +2526,207 @@
         }
 
         // ============ Properties Panel ============
+
+        // ============ PHASE 2: Pattern-Specific Configuration ============
+        function getPatternSpecificConfig(node) {
+            const pattern = node.data.pattern;
+            const config = node.data.config || {};
+
+            switch(pattern) {
+                case 'rest-api':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🔌 REST API Configuration</div>
+                            <div class="form-group">
+                                <label>HTTP Method</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'method', this.value)">
+                                    <option value="GET" ${config.method === 'GET' ? 'selected' : ''}>GET</option>
+                                    <option value="POST" ${config.method === 'POST' ? 'selected' : ''}>POST</option>
+                                    <option value="PUT" ${config.method === 'PUT' ? 'selected' : ''}>PUT</option>
+                                    <option value="PATCH" ${config.method === 'PATCH' ? 'selected' : ''}>PATCH</option>
+                                    <option value="DELETE" ${config.method === 'DELETE' ? 'selected' : ''}>DELETE</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Endpoint Path</label>
+                                <input type="text" value="${config.endpoint || ''}" onchange="updatePatternConfig('${node.id}', 'endpoint', this.value)" placeholder="/api/v1/resource">
+                                <div class="form-help">API endpoint path</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Headers</label>
+                                <textarea onchange="updatePatternConfig('${node.id}', 'headers', this.value)" placeholder='{"Content-Type": "application/json"}'>${config.headers || ''}</textarea>
+                                <div class="form-help">Request headers (JSON format)</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Rate Limit</label>
+                                <input type="number" value="${config.rateLimit || 100}" onchange="updatePatternConfig('${node.id}', 'rateLimit', parseInt(this.value))" placeholder="100">
+                                <div class="form-help">Requests per minute</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'soap-api':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🧼 SOAP API Configuration</div>
+                            <div class="form-group">
+                                <label>WSDL URL</label>
+                                <input type="text" value="${config.wsdlUrl || ''}" onchange="updatePatternConfig('${node.id}', 'wsdlUrl', this.value)" placeholder="https://example.com/service?wsdl">
+                            </div>
+                            <div class="form-group">
+                                <label>Service Name</label>
+                                <input type="text" value="${config.serviceName || ''}" onchange="updatePatternConfig('${node.id}', 'serviceName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Port Name</label>
+                                <input type="text" value="${config.portName || ''}" onchange="updatePatternConfig('${node.id}', 'portName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>SOAP Version</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'soapVersion', this.value)">
+                                    <option value="1.1" ${config.soapVersion === '1.1' ? 'selected' : ''}>SOAP 1.1</option>
+                                    <option value="1.2" ${config.soapVersion === '1.2' ? 'selected' : ''}>SOAP 1.2</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+                case 'event-stream':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">📨 Event Stream Configuration</div>
+                            <div class="form-group">
+                                <label>Topic Name</label>
+                                <input type="text" value="${config.topic || ''}" onchange="updatePatternConfig('${node.id}', 'topic', this.value)" placeholder="my-topic">
+                                <div class="form-help">Kafka topic name</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Consumer Group</label>
+                                <input type="text" value="${config.consumerGroup || ''}" onchange="updatePatternConfig('${node.id}', 'consumerGroup', this.value)" placeholder="my-consumer-group">
+                            </div>
+                            <div class="form-group">
+                                <label>Partition Strategy</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'partitionStrategy', this.value)">
+                                    <option value="round-robin" ${config.partitionStrategy === 'round-robin' ? 'selected' : ''}>Round Robin</option>
+                                    <option value="key-hash" ${config.partitionStrategy === 'key-hash' ? 'selected' : ''}>Key Hash</option>
+                                    <option value="sticky" ${config.partitionStrategy === 'sticky' ? 'selected' : ''}>Sticky</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Offset Reset</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'offsetReset', this.value)">
+                                    <option value="earliest" ${config.offsetReset === 'earliest' ? 'selected' : ''}>Earliest</option>
+                                    <option value="latest" ${config.offsetReset === 'latest' ? 'selected' : ''}>Latest</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+
+                case 'messaging':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">💬 Messaging Configuration</div>
+                            <div class="form-group">
+                                <label>Queue Name</label>
+                                <input type="text" value="${config.queueName || ''}" onchange="updatePatternConfig('${node.id}', 'queueName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Message Type</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'messageType', this.value)">
+                                    <option value="persistent" ${config.messageType === 'persistent' ? 'selected' : ''}>Persistent</option>
+                                    <option value="transient" ${config.messageType === 'transient' ? 'selected' : ''}>Transient</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prefetch Count</label>
+                                <input type="number" value="${config.prefetchCount || 10}" onchange="updatePatternConfig('${node.id}', 'prefetchCount', parseInt(this.value))">
+                            </div>
+                        </div>
+                    `;
+
+                case 'file-transfer':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">📁 File Transfer Configuration</div>
+                            <div class="form-group">
+                                <label>Transfer Protocol</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'transferProtocol', this.value)">
+                                    <option value="ftp" ${config.transferProtocol === 'ftp' ? 'selected' : ''}>FTP</option>
+                                    <option value="sftp" ${config.transferProtocol === 'sftp' ? 'selected' : ''}>SFTP</option>
+                                    <option value="ftps" ${config.transferProtocol === 'ftps' ? 'selected' : ''}>FTPS</option>
+                                    <option value="s3" ${config.transferProtocol === 's3' ? 'selected' : ''}>Amazon S3</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Directory Path</label>
+                                <input type="text" value="${config.directoryPath || ''}" onchange="updatePatternConfig('${node.id}', 'directoryPath', this.value)" placeholder="/upload">
+                            </div>
+                            <div class="form-group">
+                                <label>File Pattern</label>
+                                <input type="text" value="${config.filePattern || ''}" onchange="updatePatternConfig('${node.id}', 'filePattern', this.value)" placeholder="*.csv">
+                                <div class="form-help">Glob pattern for file matching</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'database-sync':
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">🔄 Database Sync Configuration</div>
+                            <div class="form-group">
+                                <label>Sync Method</label>
+                                <select onchange="updatePatternConfig('${node.id}', 'syncMethod', this.value)">
+                                    <option value="cdc" ${config.syncMethod === 'cdc' ? 'selected' : ''}>Change Data Capture</option>
+                                    <option value="replication" ${config.syncMethod === 'replication' ? 'selected' : ''}>Replication</option>
+                                    <option value="polling" ${config.syncMethod === 'polling' ? 'selected' : ''}>Polling</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Table Name</label>
+                                <input type="text" value="${config.tableName || ''}" onchange="updatePatternConfig('${node.id}', 'tableName', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Sync Frequency</label>
+                                <input type="text" value="${config.syncFrequency || ''}" onchange="updatePatternConfig('${node.id}', 'syncFrequency', this.value)" placeholder="*/5 * * * *">
+                                <div class="form-help">Cron expression for polling mode</div>
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return `
+                        <div class="form-section">
+                            <div class="form-section-title">⚙️ Pattern Configuration</div>
+                            <div class="form-group">
+                                <label>Custom Configuration</label>
+                                <textarea onchange="updatePatternConfig('${node.id}', 'customConfig', this.value)" placeholder='{"key": "value"}'>${config.customConfig || ''}</textarea>
+                                <div class="form-help">Pattern-specific configuration (JSON format)</div>
+                            </div>
+                        </div>
+                    `;
+            }
+        }
+
+        function updatePatternConfig(nodeId, field, value) {
+            const node = canvasNodes.find(n => n.id === nodeId);
+            if (!node || node.type !== 'integration') return;
+
+            if (!node.data.config) {
+                node.data.config = {};
+            }
+            node.data.config[field] = value;
+
+            const integration = integrationData.integrations.find(i => i.id === nodeId);
+            if (integration) {
+                if (!integration.config) {
+                    integration.config = {};
+                }
+                integration.config[field] = value;
+            }
+
+            saveHistory();
+        }
+
         function showProperties(node) {
             const panel = document.getElementById('propertiesPanel');
 
@@ -2791,6 +2992,8 @@
                             <div class="form-help">Target availability percentage</div>
                         </div>
                     </div>
+
+                    ${getPatternSpecificConfig(node)}
 
                     <div class="form-section">
                         <div class="form-section-title">Metadata</div>
