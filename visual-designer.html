@@ -440,6 +440,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            transform-origin: 0 0;
         }
 
         .connection-line {
@@ -2722,6 +2723,7 @@
                 history = [];
                 historyIndex = -1;
 
+                // Clear nodes
                 const canvasInner = document.getElementById('canvasInner');
                 canvasInner.innerHTML = `
                     <div class="empty-state">
@@ -2733,6 +2735,10 @@
                         <p style="margin-top: 0.5rem;">Or load an example to get started quickly</p>
                     </div>
                 `;
+
+                // Clear connections/edges
+                const svg = document.getElementById('connectionsSvg');
+                svg.querySelectorAll('path:not(.creating), line, text, rect').forEach(el => el.remove());
 
                 deselectAll();
                 resetZoom();
